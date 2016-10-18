@@ -14,7 +14,7 @@ points(x$InverseCVBiomass, pch=1,cex=0.8, col='red', main = unique(x$ID))
 
 PlotNAs_NAFO <- function(x) {
   plot(x[,c('BiomassTL2_i')], pch=16, cex=0.5, main = unique(x$ID))
-  points(x$BiomassTL2, pch=1,cex=0.5, col='red')
+  points(x$BiomassTL2, pch=16,cex=0.5, col='red')
   plot(x[,c('CCLargeBenthivore_i')], pch=16, cex=0.5, main = unique(x$ID))
   points(x$CCLargeBenthivore, pch=1,cex=0.5, col='red')
   plot(x[,c('CCPlanktivore_i')], pch=16, cex=0.5, main = unique(x$ID))
