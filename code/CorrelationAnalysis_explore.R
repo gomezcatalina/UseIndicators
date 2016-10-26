@@ -15,20 +15,15 @@
  # data <- subset(data, select = c("HillN1Diversity", "ShannonDiversity", "HillN2Dominance", "PielouEvenness"))
 
 #*data latest extraction which matches redundancy analysis  
-data <- read.csv("data/esswsssetq.csv", header=TRUE, na.strings = "NA", sep=",", as.is=T, strip.white=T)
-data <- Shelf_Q[Shelf_Q$ID %in% c('ESS'), ]
-data <- subset(data, select = c("HillN1Diversity", "ShannonDiversity", "HillN2Dominance", "PielouEvenness"))
-
-data <- subset(data, select = c("HillN1Diversity", "ShannonDiversity", "HillN2Dominance", "PielouEvenness"))
+#data <- read.csv("data/esswsssetq.csv", header=TRUE, na.strings = "NA", sep=",", as.is=T, strip.white=T)
+data <- read.csv("output/data/largescales/esssetq_filtered&interpolated_s.csv", header=TRUE, na.strings = "NA", sep=",", as.is=T, strip.white=T)
+#data <- Shelf_Q[Shelf_Q$ID %in% c('ESS'), ]
+data <- subset(data, select = c("HillN1Diversity_s", "ShannonDiversity_s", "HillN2Dominance_s", "PielouEvenness_s"))
 head(data)
 
-
 library(Hmisc)
-
-rcorr(as.matrix(data3,type="spearman")) #Used by CG in large scale correlation analysis
-
+rcorr(as.matrix(data,type="spearman")) #Used by CG in large scale correlation analysis
 cor(as.matrix(data,type="spearman")) 
-
 cor(data, method = "spearman") # used to re-create strata results - not that it producea different results as line above
 
 

@@ -2,6 +2,23 @@
   #Data set is defined in IndiData.R
 
 
+PlotIndicators <- function(x, y) {
+  plot(x[,c('YEAR', y)], pch=16, cex=0.5, main = unique(x$ID))
+  }
+
+PlotNAs <- function(x) {
+  plot(x[,c('YEAR', 'BiomassTL2_i')], pch=16, cex=0.5, main = unique(x$ID))
+  points(x[,c('YEAR', 'BiomassTL2')], pch=1,cex=0.8, col='red', main = unique(x$ID))
+  plot(x[,c('YEAR', 'CCLargeBenthivore_i')], pch=16, cex=0.5, main = unique(x$ID))
+  points(x[,c('YEAR', 'CCLargeBenthivore')], pch=1,cex=0.8, col='red', main = unique(x$ID))
+  plot(x[,c('YEAR','CCPlanktivore_i')], pch=16, cex=0.5, main = unique(x$ID))
+  points(x[,c('YEAR', 'CCPlanktivore')], pch=1,cex=0.8, col='red', main = unique(x$ID))
+  plot(x[,c('YEAR','InverseCVBiomass_i')], pch=16, cex=0.5, main = unique(x$ID))
+  points(x[,c('YEAR', 'InverseCVBiomass')], pch=1,cex=0.8, col='red', main = unique(x$ID))
+}
+
+
+
 # plot(SS_plot[,c('YEAR', 'BiomassTL2')], pch=1, cex=0.5)
 # points(SS_plot[,c('YEAR', 'BiomassTL2_i')], pch=1,cex=0.8, col='red')
 PlotNAs <- function(x) {
@@ -75,8 +92,8 @@ PlotIndi <- function(x) {
     theme(text = element_text(size=15)) +
     theme(axis.title.x=element_blank()) + theme(axis.title.y=element_blank()) +
     theme(legend.title=element_blank()) +
-    theme(legend.position='bottom')
-    #ggtitle(z)
+    theme(legend.position='bottom') #+
+   # ggtitle(unique(x$ID))
     #theme(legend.position="none")
 }
 
