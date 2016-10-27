@@ -36,7 +36,7 @@ SpearCorr <- function(x) {
   for(i in 1:length(ii)) {
     xi = subset(x,ID==ii[i],select=names(x[, !names(x) %in% c("ID")]) )
     mypath <- file.path("output","analysis","SpearCorr",paste("SpearCorr_", ii[i], ".csv", sep = ""))
-    correlacion <- rcorr(as.matrix(xi,type="spearman"))
+    #correlacion <- rcorr(as.matrix(xi,type="spearman"))
     correlacion <- rcorr(as.matrix((xi[, !names(xi) %in% c("ID")]),type="spearman"))
     correlacion_flat <- flattenCorrMatrix(correlacion$r, correlacion$P)
     correlacion_flat$ID  <- unique(xi$ID)
@@ -44,10 +44,30 @@ SpearCorr <- function(x) {
       }
 }
 
+SpearCorr_notFlatten <- function(x) {
+  ii = unique(x$ID)
+  for(i in 1:length(ii)) {
+    xi = subset(x,ID==ii[i],select=names(x[, !names(x) %in% c("ID")]) )
+    mypath <- file.path("output","analysis","SpearCorr", paste("SpearCorr_r_", ii[i], ".csv", sep = ""))
+    mypath2 <- file.path("output","analysis","SpearCorr", paste("SpearCorr_p_", ii[i], ".csv", sep = ""))
+    correlacion <- rcorr(as.matrix((xi[, !names(xi) %in% c("ID")]),type="spearman"))
+    correlacion_r <- correlacion$r
+    correlacion_p  <- correlacion$P
+    write.csv(correlacion_r,file=mypath)
+    write.csv(correlacion_p,file=mypath2)
+  }
+}
+
+
+correlations<-rcorr(as.matrix(ESS_4W,type="spearman"))
+write.csv(correlations$P, "ESS_4Wcorrelations_p-value_spearman.csv")   
+write.csv(correlations$r, "ESS_4Wcorrelations_r_spearman.csv") 
 #*********************************** Do correlations at all spatial scales -----------------------------------------
 
 corr_all <- lapply(indiLargeScales_s, SpearCorr)
+corr_all <- lapply(indiLargeScales_s, SpearCorr_notFlatten)
 corr_strata <- lapply(indiStrataScales_s, SpearCorr)
+corr_strata <- lapply(indiStrataScales_s, SpearCorr_notFlatten)
 
 #*********************************** Organize outputs and save as one csv for all scales -----------------------------------------
 
