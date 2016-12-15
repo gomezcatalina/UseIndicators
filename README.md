@@ -1,8 +1,8 @@
 #UseIndicators
 
-# Summary of decisions/changes to read, update and analyze indicator data sets
-# Fall 2016
-# Bundy, Cook, Gomez
+## Summary of decisions/changes to read, update and analyze indicator data sets
+## Fall 2016
+## Bundy, Cook, Gomez
 
 
 ## Section I. Raw data sets (shelfsetq, esswsssetq, nafosetq, stratsetq)
