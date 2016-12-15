@@ -1,10 +1,10 @@
   #Plots time-series of indicators depending on the scale (ID: shelf, NAFO or strata
   #Data set is defined in IndiData.R
 
-
 PlotIndicators <- function(x, y) {
   plot(x[,c('YEAR', y)], pch=16, cex=0.5, main = unique(x$ID))
-  }
+}
+
 
 PlotNAs <- function(x) {
   plot(x[,c('YEAR', 'BiomassTL2_i')], pch=16, cex=0.5, main = unique(x$ID))
@@ -16,7 +16,6 @@ PlotNAs <- function(x) {
   plot(x[,c('YEAR','InverseCVBiomass_i')], pch=16, cex=0.5, main = unique(x$ID))
   points(x[,c('YEAR', 'InverseCVBiomass')], pch=1,cex=0.8, col='red', main = unique(x$ID))
 }
-
 
 
 # plot(SS_plot[,c('YEAR', 'BiomassTL2')], pch=1, cex=0.5)
@@ -100,7 +99,7 @@ PlotIndi <- function(x) {
 PlotIndi_with_datapoints <- function(x) {
   
   ggplot(x, aes(YEAR, value, colour=variable,linetype = variable, group=variable)) +
-    scale_color_brewer(palette="Paired") +
+    scale_color_brewer(palette='Set1') +
     stat_smooth(se=F) + geom_point() +
     facet_grid(. ~ ID) +
     theme(text = element_text(size=15)) +
@@ -109,6 +108,23 @@ PlotIndi_with_datapoints <- function(x) {
     theme(legend.position='bottom')
   #ggtitle(z)
   #theme(legend.position="none")
+}
+
+
+PlotIndi_with_line <- function(x) {
+  
+  ggplot(x, aes(YEAR, value, colour=variable,
+                group=variable)) +
+    scale_colour_manual(values=cbbPalette) +
+    geom_point(size = 0.5) + geom_line(size=1.3) +
+    facet_grid(. ~ ID) +
+    theme(text = element_text(size=26)) +
+    theme(axis.title.x=element_blank()) + theme(axis.title.y=element_blank()) +
+    theme(legend.title=element_blank()) +
+    theme(legend.position='bottom') +
+    theme(strip.text.x = element_text(size=13),
+          strip.background = element_rect(fill="white"))
+
 }
 
                                   # e.g. x = meltCa
@@ -127,20 +143,63 @@ PlotIndi_strata <- function(x) {
           strip.background = element_rect(fill="white"))
 }
 
-
-PlotIndi_strata_withdatapoints <- function(x) {
-  ggplot(x, aes(YEAR, value, colour=variable,group=variable)) + #linetype = variable, 
-    scale_color_brewer(palette="Paired") +
-    stat_smooth(se=F) + geom_point() +
+PlotIndi_strata_withline <- function(x) {
+  ggplot(x, aes(YEAR, value, colour=variable, group=variable)) + #linetype = variable, 
+    #scale_color_brewer(palette="Paired") +
+    scale_colour_manual(values=cbbPalette) +
+    geom_point(size = 0.5) + geom_line(size=1.3) +
     facet_wrap( ~ ID) +
-    theme(text = element_text(size=15)) +
+    theme(text = element_text(size=22)) +
     theme(axis.title.x=element_blank()) + theme(axis.title.y=element_blank()) +
     theme(legend.title=element_blank()) +
     theme(legend.position='bottom') +
     #ggtitle("Ci (21%)") +
-    theme(strip.text.x = element_text(size=13),
-          strip.background = element_rect(fill="white"))
+    theme(strip.text.x = element_text(size=22),
+          strip.background = element_rect(fill="white")) 
+    #ggsave("myplot.png", path = 'C:/RProjects/UseIndicators/output/figures/clusters&singletons/strata')
+   }
+#PlotIndi_strata_withline(Ca)
+
+
+
+
+
+
+PlotDecoupledIndi <- function(x) {
+  
+  ggplot(x, aes(YEAR, BIOMASS, colour=Species,
+                group=Species)) +
+    scale_colour_manual(values=cbbPalette) +
+    geom_point(size=0.5) + geom_line(size=1.3) +
+    scale_colour_manual(values=cbbPalette) +
+    facet_grid(. ~ ID) +
+    theme(text = element_text(size=26)) +
+    theme(axis.title.x=element_blank()) + theme(axis.title.y=element_blank()) +
+    theme(legend.title=element_blank()) +
+    theme(legend.position='bottom')
+ }
+
+
+cbbPalette <- c("#3A74BF", "#D41200", "#080100", "#F0E442", "#66032c", "#00d5b1", 
+                "#CC79A7", "#697172", "#27e0f7", "#f7b927", "#f727ec", "#cfc1ff",
+                "#1f7000", "#4c3002", "#ffffff", "#b2aea7", "#e04e00", "#285d66", "#6b1393", "#7dfc07")
+
+PlotDecoupledIndi_with_area <- function(x,y) {
+
+ggplot() + 
+  geom_area(data=y, aes(x=YEAR, y=value), color='lightgrey',alpha=0.2) +
+  geom_line(data=x, aes(x=YEAR, y=BIOMASS, colour=Species, group=Species), size=1.1) +
+  scale_colour_manual(values=cbbPalette) +
+  facet_grid(. ~ ID) +
+  theme(text = element_text(size=26)) +
+  theme(axis.title.x=element_blank()) + theme(axis.title.y=element_blank()) +
+  theme(legend.title=element_blank()) +
+  theme(legend.position='bottom') +
+  ggtitle(unique(y$variable))
+    
 }
+
+
 
 
 

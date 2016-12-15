@@ -16,9 +16,23 @@
 
 #*data latest extraction which matches redundancy analysis  
 #data <- read.csv("data/esswsssetq.csv", header=TRUE, na.strings = "NA", sep=",", as.is=T, strip.white=T)
-data <- read.csv("output/data/largescales/esssetq_filtered&interpolated_s.csv", header=TRUE, na.strings = "NA", sep=",", as.is=T, strip.white=T)
+data <- read.csv("C:/RProjects/UseIndicators/output/data/largescales/esswsssetq_filtered&interpolated_s.csv", header=TRUE, na.strings = "NA", sep=",", as.is=T, strip.white=T)
 #data <- Shelf_Q[Shelf_Q$ID %in% c('ESS'), ]
-data <- subset(data, select = c("HillN1Diversity_s", "ShannonDiversity_s", "HillN2Dominance_s", "PielouEvenness_s"))
+data <- subset(data, select = c('LClupeids.L_s',
+                                'LForageFish.L_s',
+                                'LGroundfish.L_s',
+                                'LGadoids.L_s',
+                                'LFinfish.L_s',
+                                'Landings.L_s', 
+                                'FPGroundfish.L_s',
+                                'FPGadoids.L_s',
+                                'FPFlatfish.L_s',
+                                'LFlatfish.L_s',
+                                'FishinginBalance.L_s',
+                                'MeanTrophicLevel.L_s',
+                                'FishingPressure.L_s',
+                                'FPFinfish.L_s'))
+
 head(data)
 
 library(Hmisc)

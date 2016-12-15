@@ -59,18 +59,13 @@ SpearCorr_notFlatten <- function(x) {
 }
 
 
-correlations<-rcorr(as.matrix(ESS_4W,type="spearman"))
-write.csv(correlations$P, "ESS_4Wcorrelations_p-value_spearman.csv")   
-write.csv(correlations$r, "ESS_4Wcorrelations_r_spearman.csv") 
 #*********************************** Do correlations at all spatial scales -----------------------------------------
-
 corr_all <- lapply(indiLargeScales_s, SpearCorr)
 corr_all <- lapply(indiLargeScales_s, SpearCorr_notFlatten)
 corr_strata <- lapply(indiStrataScales_s, SpearCorr)
 corr_strata <- lapply(indiStrataScales_s, SpearCorr_notFlatten)
 
 #*********************************** Organize outputs and save as one csv for all scales -----------------------------------------
-
 SpearCorr_SHELF <- read.csv("C:/RProjects/UseIndicators/output/analysis/SpearCorr/SpearCorr_SHELF.csv")
 SpearCorr_SHELF$ID <- "SHELF"
 SpearCorr_ESS <- read.csv("C:/RProjects/UseIndicators/output/analysis/SpearCorr/SpearCorr_ESS.csv")
@@ -197,6 +192,5 @@ SpearCorrResults <- rbind(SpearCorr_440, SpearCorr_441, SpearCorr_442, SpearCorr
 head(SpearCorrResults)
 SpearCorrResults_SUMMARY <- SpearCorrResults[,c('ID', 'row', 'column', 'cor', 'p')] 
 write.csv(SpearCorrResults_SUMMARY, "output/analysis/SpearCorr/SpearCorrResults_summary.csv", row.names=FALSE)
-
 
 

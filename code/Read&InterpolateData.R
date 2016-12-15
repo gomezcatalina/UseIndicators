@@ -1,23 +1,30 @@
 #  August 2016 
+#Note: To plot indicators (without doing interpolations etc, just read first 20 lines here and go straight to Section II (standardize indicators) )
 #install.packages("devtools")
 setwd("C:/RProjects/UseIndicators")
 #  devtools::install_github("rstudio/packrat")
 #packrat::init()                     # -- https://rstudio.github.io/packrat/commands.html # Reads packages needed for plots and analysis
+#disable(project = NULL, restart = TRUE)
 library(ggplot2)
+library(ggthemes)
 theme_set(theme_bw())
 library(reshape2)
 system.file(package="ggplot2")      # This checks that you are NOT using private library via packrat IF you want to do ggplots
-
+source('C:/RProjects/ExtractIndicators/R/stdize.R')
+source('C:/RProjects/ExtractIndicators/R/stdizeFrame.R')
+source('code/IndiFunctions.R')       # Sources functions that set ggplot settings to plot indicators per each scale (Shelf, NAFO and strata scale)
+source('code/keepdropcolumn.R')
 library(gridExtra)
-library(Hmisc)
-library(PerformanceAnalytics)
-library(plyr)
-library(dplyr)
-library(corrplot)
-library(zoo)
-library(Hmisc)
-library(zoo)
-library(imputeTS)
+
+# library(Hmisc)
+# library(PerformanceAnalytics)
+# library(plyr)
+# library(dplyr)
+# library(corrplot)
+# library(zoo)
+# library(Hmisc)
+# library(zoo)
+# library(imputeTS)
 
 require(devtools) 
 # install_github('Beothuk/bio.base', force = TRUE) 
@@ -25,13 +32,10 @@ require(devtools)
 # require(bio.utilities)               # https://github.com/Beothuk/bio.utilities    #install_github('Beothuk/bio.utilities') #compiled functions from ACook, Jae, Brad and Mike Mcmahon
 # install_github('Beothuk/bio.utilities', force = TRUE) 
 library(missForest)                  # randomForest approximation to fill in missing values....full dataset using relationships bwn variables to fill in NAs
-source('code/IndiFunctions.R')       # Sources functions that set ggplot settings to plot indicators per each scale (Shelf, NAFO and strata scale)
-source('code/keepdropcolumn.R')
 path <- file.path('C:/RProjects/ExtractIndicators')
 require(ODBC)
 source(paste(path,'/R/amc helpers.R',sep=""))
-source('C:/RProjects/ExtractIndicators/R/stdize.R')
-source('C:/RProjects/ExtractIndicators/R/stdizeFrame.R')
+
 
 # --------SECTION I. Reads, filters and interpolates csv data of indicators extracted using A.Cook's package  *****  #  ####
 # There are several NAs in the time-series data. The hierarchical cluster analysis 
@@ -396,10 +400,13 @@ dev.off()
 shelf_raw <- read.csv("output/data/largescales/shelfsetq_filtered&interpolated.csv", header=TRUE, na.strings = "NA", sep=",", as.is=T, strip.white=T)
 shelf_s = stdizeFrame(shelf_raw)
 shelf_s <- shelf_s[ , order(names(shelf_s))]
+
 #write.csv(shelf_s, "output/data/shelfsetq_filtered&interpolated_s.csv", row.names=FALSE)
 esswss_raw <- read.csv("output/data/largescales/esswsssetq_filtered&interpolated.csv", header=TRUE, na.strings = "NA", sep=",", as.is=T, strip.white=T)
 esswss_s = stdizeFrame(esswss_raw)
 esswss_s <- esswss_s[ , order(names(esswss_s))]
+# write.csv(esswss_s, "output/data/largescales/esswsssetq_filtered&interpolated_s.csv", row.names=FALSE)
+
 wss_s <- esswss_s[esswss_s$ID %in% c('WSS'), ]
 ess_s <- esswss_s[esswss_s$ID %in% c('ESS'), ]
 # write.csv(ess_s, "output/data/largescales/esssetq_filtered&interpolated_s.csv", row.names=FALSE)
@@ -429,11 +436,12 @@ strata_s  <- lapply(indiStrata , stdizeFrame)
 
 # --------SECTION III Plot indicators *****  #  ####
 shelf_melt <- melt(shelf_s, id=c('YEAR', 'ID'))
+ess_melt <- melt(ess_s, id=c('YEAR', 'ID'))
+wss_melt <- melt(wss_s, id=c('YEAR', 'ID'))
 esswss_melt <- melt(esswss_s, id=c('YEAR', 'ID'))
 nafo4vn_melt <- melt(nafo4vn_s, id=c('YEAR', 'ID'))
 nafo4vs_melt <- melt(nafo4vs_s, id=c('YEAR', 'ID'))
 nafo4w_melt <- melt(nafo4w_s, id=c('YEAR', 'ID'))
-nafo4vs_melt <- melt(nafo4vs_s, id=c('YEAR', 'ID'))
 nafo4x_melt <- melt(nafo4x_s, id=c('YEAR', 'ID'))
 nafo_melt <- rbind(nafo4vn_melt, nafo4vs_melt, nafo4w_melt, nafo4vs_melt, nafo4x_melt)
 strata_melt <- melt(strata_s, id=c('YEAR', 'ID'))
@@ -516,302 +524,992 @@ dev.off()
 
 ## Clusters Identified in the redundancy analysis at large scales ###
 # # C1
-C1 <- shelfesswss_melt[shelfesswss_melt$variable %in% c('Biomass_s',
-                                                        'BiomassClupeids_s',
-                                                        'BiomassFinfish_s',
-                                                        'BiomassForage_s',
-                                                        'BiomassTL3_s',
-                                                        'BPelagicToDemersal_s',
-                                                        'BTGPlanktivore_s'), ]
-C1_nafo <- nafo_melt[nafo_melt$variable %in% c('Biomass_s',
-                                               'BiomassClupeids_s',
-                                               'BiomassFinfish_s',
-                                               'BiomassForage_s',
-                                               'BiomassTL3_s',
-                                               'BPelagicToDemersal_s',
-                                               'BTGPlanktivore_s'), ]
+C1 <- shelfesswss_melt[shelfesswss_melt$variable %in% c('LClupeids.L_s',
+                                                        'LForageFish.L_s',
+                                                        'LGroundfish.L_s',
+                                                        'LGadoids.L_s',
+                                                        'LFinfish.L_s',
+                                                        'Landings.L_s', 
+                                                        'FPGroundfish.L_s',
+                                                        'FPGadoids.L_s'), ]
 
-#  C2
-C2 <- shelfesswss_melt[shelfesswss_melt$variable %in% c("MargalefRichness_s",
-                                                        "SpeciesRichness_s"), ]
-C2_nafo <- nafo_melt[nafo_melt$variable %in% c("MargalefRichness_s",
-                                              "SpeciesRichness_s"), ]
-#   C3
-C3 <- shelfesswss_melt[shelfesswss_melt$variable %in% c("HillN1Diversity_s",
-                                                        "ShannonDiversity_s",
-                                                        "HillN2Dominance_s"), ]
-C3_nafo <- nafo_melt[nafo_melt$variable %in% c("HillN1Diversity_s",
-                                               "ShannonDiversity_s",
-                                               "HillN2Dominance_s"), ]
+C1_nafo <- nafo_melt[nafo_melt$variable %in% c('LClupeids.L_s',
+                                               'LForageFish.L_s',
+                                               'LGroundfish.L_s',
+                                               'LGadoids.L_s',
+                                               'LFinfish.L_s',
+                                               'Landings.L_s', 
+                                               'FPGroundfish.L_s',
+                                               'FPGadoids.L_s'), ]
+
+#   C2
+C2 <- shelfesswss_melt[shelfesswss_melt$variable %in% c("FishingPressure.L_s",
+                                                        "FPFinfish.L_s"), ]
+
+C2_nafo <- nafo_melt[nafo_melt$variable %in% c("FishingPressure.L_s",
+                                               "FPFinfish.L_s"), ]
+
+# #  C3
+C3 <- shelfesswss_melt[shelfesswss_melt$variable %in% c("FishinginBalance.L_s",
+                                                        "MeanTrophicLevel.L_s"), ]
+
+C3_nafo <- nafo_melt[nafo_melt$variable %in% c("FishinginBalance.L_s",
+                                               "MeanTrophicLevel.L_s"), ]
+
 # #  C4
-C4 <- shelfesswss_melt[shelfesswss_melt$variable %in% c("LargeFishIndicator_s",
-                                                        "LargeSpeciesIndicator_s",
-                                                        "PropPredatoryFish_s",
-                                                        "MeanLengthBiomass_s",
-                                                        "MMLengthBiomass_s"), ]
-C4_nafo <- nafo_melt[nafo_melt$variable %in% c("LargeFishIndicator_s",
-                                               "LargeSpeciesIndicator_s",
-                                               "PropPredatoryFish_s",
-                                               "MeanLengthBiomass_s",
-                                               "MMLengthBiomass_s"), ]
+C4 <- shelfesswss_melt[shelfesswss_melt$variable %in% c("CCPlanktivore_s",
+                                                        "CommunityCondition_s"), ]
+
+C4_nafo <- nafo_melt[nafo_melt$variable %in% c("CCPlanktivore_s",
+                                               "CommunityCondition_s"), ]
+
 # #  C5
-C5 <- shelfesswss_melt[shelfesswss_melt$variable %in% c("BiomassGadoids_s",
-                                                        "BiomassGroundfish_s",
-                                                        "BiomassTL4_s",
-                                                        "BTGPiscivore_s"), ]
-C5_nafo <- nafo_melt[nafo_melt$variable %in% c("BiomassGadoids_s",
-                                               "BiomassGroundfish_s",
-                                               "BiomassTL4_s",
-                                               "BTGPiscivore_s"), ]
+C5 <- shelfesswss_melt[shelfesswss_melt$variable %in% c('LargeFishIndicator_s', 
+                                                        'MeanLengthBiomass_s',
+                                                        'MMLengthBiomass_s',
+                                                        'MMLengthAbundance_s',
+                                                        'PropPredatoryFish_s',
+                                                        'LargeSpeciesIndicator_s'), ]
+
+C5_nafo <- nafo_melt[nafo_melt$variable %in% c('LargeFishIndicator_s', 
+                                               'MeanLengthBiomass_s',
+                                               'MMLengthBiomass_s',
+                                               'MMLengthAbundance_s',
+                                               'PropPredatoryFish_s',
+                                               'LargeSpeciesIndicator_s'), ]
+
 # #  C6
-C6 <- shelfesswss_melt[shelfesswss_melt$variable %in% c("CommunityCondition_s",
-                                                        "CCPlanktivore_s"), ]
-C6_nafo <- nafo_melt[nafo_melt$variable %in% c("CommunityCondition_s",
-                                               "CCPlanktivore_s"), ]
+C6 <- shelfesswss_melt[shelfesswss_melt$variable %in% c('BiomassGroundfish_s',
+                                                         'BiomassGadoids_s',
+                                                         'BiomassTL4_s',
+                                                        'BTGPiscivore_s'), ]
+
+C6_nafo <- nafo_melt[nafo_melt$variable %in% c('BiomassGroundfish_s',
+                                                'BiomassGadoids_s',
+                                                'BiomassTL4_s',
+                                               'BTGPiscivore_s'), ]
+
+
 # #  C7
-C7 <- shelfesswss_melt[shelfesswss_melt$variable %in% c('Heips_s', 
-                                                        'PielouEvenness_s'), ]
-C7_nafo <- nafo_melt[nafo_melt$variable %in% c('Heips_s', 
-                                              'PielouEvenness_s'), ]
+C7 <- shelfesswss_melt[shelfesswss_melt$variable %in% c("FPSkates.L_s",
+                                                        "LSkates.L_s"), ]
+
+C7_nafo <- nafo_melt[nafo_melt$variable %in% c("FPSkates.L_s",
+                                               "LSkates.L_s"), ]
+
 # #  C8
-C8 <- shelfesswss_melt[shelfesswss_melt$variable %in% c("LClupeids.L_s",
-                                                        "LForageFish.L_s"), ]
-C8_nafo <- nafo_melt[nafo_melt$variable %in% c("LClupeids.L_s",
-                                               "LForageFish.L_s"), ]
+C8 <- shelfesswss_melt[shelfesswss_melt$variable %in% c("PielouEvenness_s",
+                                                        "Heips_s",
+                                                        "HillN1Diversity_s",
+                                                        "HillN2Dominance_s",
+                                                        "ShannonDiversity_s"), ]
+
+C8_nafo <- nafo_melt[nafo_melt$variable %in% c("PielouEvenness_s",
+                                               "Heips_s",
+                                               "HillN1Diversity_s",
+                                               "HillN2Dominance_s",
+                                               "ShannonDiversity_s"), ]
 # #  C9
-C9 <- shelfesswss_melt[shelfesswss_melt$variable %in% c("Landings.L_s",
-                                                        "LFinfish.L_s",
-                                                        "LGroundfish.L_s",
-                                                        "LGadoids.L_s",
-                                                        "FPGroundfish.L_s",
-                                                        "FPGadoids.L_s"), ]
-C9_nafo <- nafo_melt[nafo_melt$variable %in% c("Landings.L_s",
-                                               "LFinfish.L_s",
-                                               "LGroundfish.L_s",
-                                               "LGadoids.L_s",
-                                               "FPGroundfish.L_s",
-                                               "FPGadoids.L_s"), ]
+C9 <- shelfesswss_melt[shelfesswss_melt$variable %in% c("Biomass_s",
+                                                         "BiomassClupeids_s",
+                                                         "BiomassFinfish_s",
+                                                         "BiomassForage_s",
+                                                         "BiomassTL3_s",
+                                                         "BPelagicToDemersal_s",
+                                                         "BTGPlanktivore_s"), ]
+
+C9_nafo <- nafo_melt[nafo_melt$variable %in% c("Biomass_s",
+                                                "BiomassClupeids_s",
+                                                "BiomassFinfish_s",
+                                                "BiomassForage_s",
+                                                "BiomassTL3_s",
+                                                "BPelagicToDemersal_s",
+                                                "BTGPlanktivore_s"), ]
+
 # #  C10
-C10 <- shelfesswss_melt[shelfesswss_melt$variable %in% c("DiversityTargetSpp.L_s",
-                                                        "LInvertebrates.L_s"), ]
-C10_nafo <- nafo_melt[nafo_melt$variable %in% c("DiversityTargetSpp.L_s",
-                                               "LInvertebrates.L_s"), ]
-
-# #  C11
-C11 <- shelfesswss_melt[shelfesswss_melt$variable %in% c("FishingPressure.L_s",
-                                                         "FPFinfish.L_s"), ]
-C11_nafo <- nafo_melt[nafo_melt$variable %in% c("FishingPressure.L_s",
-                                                "FPFinfish.L_s"), ]
-
-# #  C12
-C12 <- shelfesswss_melt[shelfesswss_melt$variable %in% c("FPClupeids.L_s",
-                                                         "FPForageFish.L_s"), ]
-C12_nafo <- nafo_melt[nafo_melt$variable %in% c("FPClupeids.L_s",
-                                                "FPForageFish.L_s"), ]
-# #  C13
-C13 <- shelfesswss_melt[shelfesswss_melt$variable %in% c("FPSkates.L_s",
-                                                         "LSkates.L_s"), ]
-C13_nafo <- nafo_melt[nafo_melt$variable %in% c("FPSkates.L_s",
-                                                "LSkates.L_s"), ]
-# #  C14
-C14 <- shelfesswss_melt[shelfesswss_melt$variable %in% c("FPFlatfish.L_s",
+C10 <- shelfesswss_melt[shelfesswss_melt$variable %in% c("FPFlatfish.L_s",
                                                          "LFlatfish.L_s"), ]
-C14_nafo <- nafo_melt[nafo_melt$variable %in% c("FPFlatfish.L_s",
+
+C10_nafo <- nafo_melt[nafo_melt$variable %in% c("FPFlatfish.L_s",
                                                 "LFlatfish.L_s"), ]
 
-# # Singletons
-S1 <- shelfesswss_melt[shelfesswss_melt$variable %in% c("MargalefGroundfish_s",
-                                                        "KemptonQ_s"), ]
-S1_nafo <- nafo_melt[nafo_melt$variable %in% c("MargalefGroundfish_s",
-                                               "KemptonQ_s"), ]
+# #  C11
+C11 <- shelfesswss_melt[shelfesswss_melt$variable %in% c("MargalefRichness_s",
+                                                         "SpeciesRichness_s",
+                                                         "MargalefGroundfish_s",
+                                                         "KemptonQ_s"), ]
 
-S2 <- shelfesswss_melt[shelfesswss_melt$variable %in% c("BTGLargeBenthivore_s",
-                                                        "BTGMediumBenthivore_s",
+C11_nafo <- nafo_melt[nafo_melt$variable %in% c("MargalefRichness_s",
+                                                "SpeciesRichness_s",
+                                                "MargalefGroundfish_s",
+                                                "KemptonQ_s"), ]
+
+
+# #  C12
+C12 <- shelfesswss_melt[shelfesswss_melt$variable %in% c("DiversityTargetSpp.L_s",
+                                                         "LInvertebrates.L_s"), ]
+
+C12_nafo <- nafo_melt[nafo_melt$variable %in% c("DiversityTargetSpp.L_s",
+                                                "LInvertebrates.L_s"), ]
+
+
+# #  C12
+C12 <- shelfesswss_melt[shelfesswss_melt$variable %in% c("DiversityTargetSpp.L_s",
+                                                         "LInvertebrates.L_s"), ]
+
+C12_nafo <- nafo_melt[nafo_melt$variable %in% c("DiversityTargetSpp.L_s",
+                                                "LInvertebrates.L_s"), ]
+
+
+# #  C13
+C13 <- shelfesswss_melt[shelfesswss_melt$variable %in% c("BiomassFlatfish_s",
+                                                         "BTGMediumBenthivore_s"), ]
+
+C13_nafo <- nafo_melt[nafo_melt$variable %in% c("BiomassFlatfish_s",
+                                                "BTGMediumBenthivore_s"), ]
+
+# #  C14
+C14 <- shelfesswss_melt[shelfesswss_melt$variable %in% c("BiomassSkates_s",
+                                                         "BTGLargeBenthivore_s"), ]
+
+C14_nafo <- nafo_melt[nafo_melt$variable %in% c("BiomassSkates_s",
+                                                "BTGLargeBenthivore_s"), ]
+
+# #  C15
+C15 <- shelfesswss_melt[shelfesswss_melt$variable %in% c("FPClupeids.L_s",
+                                                         "FPForageFish.L_s"), ]
+
+C15_nafo <- nafo_melt[nafo_melt$variable %in% c("FPClupeids.L_s",
+                                                "FPForageFish.L_s"), ]
+
+
+# # Singletons
+
+S1 <- shelfesswss_melt[shelfesswss_melt$variable %in% c("BiomassTL2_s",
                                                         "BTGZoopiscivore_s"), ]
-S2_nafo <- nafo_melt[nafo_melt$variable %in% c("BTGLargeBenthivore_s",
-                                               "BTGMediumBenthivore_s",
-                                               "BTGZoopiscivore_s"), ]
+
+S1_nafo <- nafo_melt[nafo_melt$variable %in% c("BiomassTL2_s",
+                                                "BTGZoopiscivore_s"), ]
+
+S2 <- shelfesswss_melt[shelfesswss_melt$variable %in% c("CCPiscivore_s",
+                                                        "CCZoopiscivore_s"), ]
+
+S2_nafo <- nafo_melt[nafo_melt$variable %in% c("CCPiscivore_s",
+                                               "CCZoopiscivore_s"), ]
 
 S3 <- shelfesswss_melt[shelfesswss_melt$variable %in% c("CCMediumBenthivore_s",
-                                                        "CCPiscivore_s",
-                                                        "CCZoopiscivore_s",
                                                         "CCLargeBenthivore_s"), ]
+
 S3_nafo <- nafo_melt[nafo_melt$variable %in% c("CCMediumBenthivore_s",
-                                               "CCPiscivore_s",
-                                               "CCZoopiscivore_s",
                                                "CCLargeBenthivore_s"), ]
 
-S4 <- shelfesswss_melt[shelfesswss_melt$variable %in% c("BInvertebrateToDemersal_s",
-                                                        "MeanLengthAbundance_s",
-                                                        "MeanTrophicLevel_s"), ]
-S4_nafo <- nafo_melt[nafo_melt$variable %in% c("BInvertebrateToDemersal_s",
-                                               "MeanLengthAbundance_s",
-                                               "MeanTrophicLevel_s"), ]
 
-S5 <- shelfesswss_melt[shelfesswss_melt$variable %in% c("MeanLifespan_s",
-                                                        "MMLengthAbundance_s",
+S4 <- shelfesswss_melt[shelfesswss_melt$variable %in% c("InverseCVBiomass_s",
                                                         "Intrinsicvulnerabilityindex.L_s",
-                                                        "BiomassTL2_s",
-                                                        "InverseCVBiomass_s"), ]
-S5_nafo <- nafo_melt[nafo_melt$variable %in% c("MeanLifespan_s",
-                                               "MMLengthAbundance_s",
+                                                        "LLargePelagic.L_s"), ]
+
+S4_nafo <- nafo_melt[nafo_melt$variable %in% c("InverseCVBiomass_s",
                                                "Intrinsicvulnerabilityindex.L_s",
-                                               "BiomassTL2_s",
-                                               "InverseCVBiomass_s"), ]
+                                               "LLargePelagic.L_s"), ]
 
-S6 <- shelfesswss_melt[shelfesswss_melt$variable %in% c("BiomassFlatfish_s",
-                                                        "BiomassInvertebrates_s",
-                                                        "BiomassSkates_s",
-                                                        "FishinginBalance.L_s"), ]
 
-S6_nafo <- nafo_melt[nafo_melt$variable %in% c("BiomassFlatfish_s",
-                                               "BiomassInvertebrates_s",
-                                               "BiomassSkates_s",
-                                               "FishinginBalance.L_s"), ]
+S5 <- shelfesswss_melt[shelfesswss_melt$variable %in% c("MarineTrophicIndex.L_s",
+                                                        "MeanLifespan_s",
+                                                        "MeanTrophicLevel_s",
+                                                        "MeanLengthAbundance_s"), ]
 
-S7 <- shelfesswss_melt[shelfesswss_melt$variable %in% c("MeanTrophicLevel.L_s",
-                                                        "MarineTrophicIndex.L_s",
-                                                        "LLargePelagic.L_s",
-                                                        "FPInvertebrates.L_s"), ]
+S5_nafo <- nafo_melt[nafo_melt$variable %in% c("MarineTrophicIndex.L_s",
+                                               "MeanLifespan_s",
+                                               "MeanTrophicLevel_s",
+                                               "MeanLengthAbundance_s"), ]
 
-S7_nafo <- nafo_melt[nafo_melt$variable %in% c("MeanTrophicLevel.L_s",
-                                               "MarineTrophicIndex.L_s",
-                                               "LLargePelagic.L_s",
-                                               "FPInvertebrates.L_s"), ]
+
 
 #Clusters and singletons identified in the redundancy analysis at the strata scale
 
-#Cluster A
-# 92%
-# MargalefRichness
-# SpeciesRichness
 Ca <- strata_melt[strata_melt$variable %in% c("MargalefRichness_s",
-                                              "SpeciesRichness_s"), ]
-#Cluster B
-# 74%
-# HillN1Diversity
-# ShannonDiversity
-# HillN2Dominance
-# PielouEvenness
-Cb <- strata_melt[strata_melt$variable %in% c("HillN1Diversity_s",
-                                              "ShannonDiversity_s",
-                                              "HillN2Dominance_s",
-                                              "PielouEvenness_s",
-                                              "Heips_s"), ]
-#Cluster C
-# 65%
-# BiomassClupeids*
-# BiomassForage*
-# BPelagicToDemersal*
-# BTGPlanktivore*
-# Biomass*
-# BiomassFinfish*
-# BiomassTL3*
-Cc <- strata_melt[strata_melt$variable %in% c('Biomass_s',
-                                              'BiomassClupeids_s',
-                                              'BiomassFinfish_s',
-                                              'BiomassForage_s',
-                                              'BiomassTL3_s',
-                                              'BPelagicToDemersal_s',
-                                              'BTGPlanktivore_s'), ]
-#Cluster D
-# 52%
-# BiomassFlatfish
-# BTGMediumBenthivore
-Cd <- strata_melt[strata_melt$variable %in% c("BiomassFlatfish_s",
+                                              "SpeciesRichness_s",
+                                              "KemptonQ_s",
+                                              "MargalefGroundfish_s"), ]
+
+Cb <- strata_melt[strata_melt$variable %in% c('BiomassGroundfish_s',
+                                              'BiomassGadoids_s',
+                                              'BiomassTL4_s',
+                                              'BTGPiscivore_s'), ]
+
+Cc <- strata_melt[strata_melt$variable %in% c("BiomassFlatfish_s",
                                               "BTGMediumBenthivore_s"), ]
-#Cluster E
-# 50%
-# BiomassSkates
-# BTGLargeBenthivore
-Ce <- strata_melt[strata_melt$variable %in% c("BiomassSkates_s",
-                                              "BTGLargeBenthivore_s"), ]
-# Cluster F
-# 44%
-# BiomassGadoids
-# BiomassTL4
-# BTGPiscivore
-# BiomassGroundfish
-Cf <- strata_melt[strata_melt$variable %in% c("BiomassGadoids_s",
-                                              "BiomassGroundfish_s",
-                                              "BiomassTL4_s",
-                                              "BTGPiscivore_s"), ]
-# Cluster G
-# 38%
-# CommunityCondition
-# CCMediumBenthivore
-# CCPiscivore
-Cg <- strata_melt[strata_melt$variable %in% c("CommunityCondition_s",
-                                              "CCMediumBenthivore_s",
-                                              "CCPiscivore_s"), ]
-# Cluster H
-# 37%
-# MMLengthAbundance
-# MMLengthBiomass
-# PropPredatoryFish
-# LargeFishIndicator
-# MeanLengthBiomass
-# LargeSpeciesIndicator
-# MeanLengthAbundance
-Ch <- strata_melt[strata_melt$variable %in% c("MMLengthAbundance_s",
-                                              "MeanLengthAbundance_s",
-                                              "LargeFishIndicator_s",
-                                              "LargeSpeciesIndicator_s",
-                                              "PropPredatoryFish_s",
-                                              "MeanLengthBiomass_s",
-                                              "MMLengthBiomass_s"), ]
-# Cluster I
-# 21%
-# MeanLifespan
-# BTGZoopiscivore
-Ci <- strata_melt[strata_melt$variable %in% c("MeanLifespan_s",
+
+Cd <- strata_melt[strata_melt$variable %in% c("PielouEvenness_s",
+                                              "Heips_s",
+                                              "HillN1Diversity_s",
+                                              "HillN2Dominance_s",
+                                              "ShannonDiversity_s"), ]
+
+Ce <- strata_melt[strata_melt$variable %in% c('LargeFishIndicator_s', 
+                                              'MeanLengthBiomass_s',
+                                              'MMLengthBiomass_s',
+                                              'MMLengthAbundance_s',
+                                              'PropPredatoryFish_s',
+                                              'LargeSpeciesIndicator_s'), ]
+
+Cf <- strata_melt[strata_melt$variable %in% c("Biomass_s",
+                                              "BiomassClupeids_s",
+                                              "BiomassFinfish_s",
+                                              "BiomassForage_s",
+                                              "BiomassTL3_s",
+                                              "BPelagicToDemersal_s",
+                                              "BTGPlanktivore_s"), ]
+
+Cg <- strata_melt[strata_melt$variable %in% c("MeanLifespan_s",
                                               "BTGZoopiscivore_s"), ]
 
-# #"Cluster" J
-# 19%
-# KemptonQ
-# MargalefGroundfish
-Cj <- strata_melt[strata_melt$variable %in% c("MargalefGroundfish_s",
-                                              "KemptonQ_s"), ]
-# #Singletons
-# InverseCVBiomass
-# MeanTrophicLevel
-# CCZoopiscivore
-# BiomassTL2
+Ch <- strata_melt[strata_melt$variable %in% c("CommunityCondition_s",
+                                              "CCZoopiscivore_s"), ]
+ 
 S_strata <- strata_melt[strata_melt$variable %in% c("InverseCVBiomass_s",
-                                                    "MeanTrophicLevel_s",
-                                                    "CCZoopiscivore_s",
-                                                    "BiomassTL2_s"), ]
+                                                    "MeanTrophicLevel_s", 
+                                                    "MeanLengthAbundance_s"), ]
 
+S_strata2 <- strata_melt[strata_melt$variable %in% c("CCPiscivore_s",
+                                                    "CCPlanktivore_s",
+                                                    "CCMediumBenthivore_s"), ]
 
+S_strata3 <- strata_melt[strata_melt$variable %in% c("BTGLargeBenthivore_s",
+                                                     "BiomassSkates_s"), ]
 
-# --------SECTION V Plot clsuters & singletons *****  #  ####
+# --------SECTION V Plot clusters & singletons *****  #  ####
+
 AllIndi <-  list(C1, C1_nafo, C2, C2_nafo, C3, C3_nafo, C4, C4_nafo, 
                  C5, C5_nafo, C6, C6_nafo, C7, C7_nafo, C8, C8_nafo, 
-                 C9, C9_nafo, C10, C10_nafo, C11, C11_nafo, C12,  C12_nafo, 
-                 C13,  C13_nafo, C14,  C14_nafo, 
-                 S1, S1_nafo, S2, S2_nafo, S3,  S3_nafo, S4, S4_nafo, 
-                 S5, S5_nafo, S6, S6_nafo, S7, S7_nafo)
+                 C9, C9_nafo, C10, C10_nafo, C11, C11_nafo, C12, C12_nafo,
+                 C13,  C13_nafo, C14,  C14_nafo, C15,  C15_nafo)
 
-AllIndi_strata <-  list(Ca, Cb, Cc, Cd, Ce, Cf, Cg, Ch, Ci, Cj, S_strata)
+AllIndi_S <-  list(S1, S1_nafo, S2, S2_nafo, S3,  S3_nafo, S4, S4_nafo, 
+                 S5, S5_nafo)
 
-source('code/IndiFunctions.R')     
+AllIndi_strata <-  list(Ca, Cb, Cc, Cd, Ce, Cf, Cg, Ch)
 
-pdf("output/figures/clusters&singletons/clusters&singletons_largeScales.pdf", width=20,height=8)
-Plots_all_Indi <- lapply(AllIndi, PlotIndi)
+AllIndi_S_strata <- list(S_strata, S_strata2, S_strata3)
+
+# #  C15
+C1_2_3_10 <- shelfesswss_melt[shelfesswss_melt$variable %in% c('LClupeids.L_s',
+                                                        'LForageFish.L_s',
+                                                        'LGroundfish.L_s',
+                                                        'LGadoids.L_s',
+                                                        'LFinfish.L_s',
+                                                        'Landings.L_s', 
+                                                        'FPGroundfish.L_s',
+                                                        'FPGadoids.L_s',
+                                                        'FPFlatfish.L_s',
+                                                        'LFlatfish.L_s',
+                                                        'FishinginBalance.L_s',
+                                                        'MeanTrophicLevel.L_s',
+                                                        'FishingPressure.L_s',
+                                                        'FPFinfish.L_s'), ]
+
+C1_2_3_10_nafo <- nafo_melt[nafo_melt$variable %in% c('LClupeids.L_s',
+                                                  'LForageFish.L_s',
+                                                  'LGroundfish.L_s',
+                                                  'LGadoids.L_s',
+                                                  'LFinfish.L_s',
+                                                  'Landings.L_s', 
+                                                  'FPGroundfish.L_s',
+                                                  'FPGadoids.L_s',
+                                                  'FPFlatfish.L_s',
+                                                  'LFlatfish.L_s',
+                                                  'FishinginBalance.L_s',
+                                                  'MeanTrophicLevel.L_s',
+                                                  'FishingPressure.L_s',
+                                                  'FPFinfish.L_s'), ]
+
+ Other  <-  list(C1C10, C1C10_nafo)
+ lapply(Other, PlotIndi_with_line)
+ png("output/figures/clusters&singletons/C1&C2&C3&C10.png", width=1100,height=800, res=72)
+ grid.arrange(PlotIndi_with_line(C1_2_3_10), PlotIndi_with_line(C1_2_3_10_nafo))
+ dev.off()
+ 
+# lapply(Other, PlotIndi)
+# lapply(Other, PlotIndi_with_datapoints)
+
+ # **** Save strata scale clusters ### # ---------------
+pdf("output/figures/clusters&singletons/clusters_largeScales.pdf", width=22,height=8)
+Plots_all_Indi <- lapply(AllIndi, PlotIndi_with_line)
 Plots_all_Indi
 dev.off()
 
-pdf("output/figures/clusters&singletons/clusters&singletons_largeScales_withPoints.pdf", width=20,height=8)
-lapply(AllIndi, PlotIndi_with_datapoints)
+# **** Save same plot as above but as individual png files 
+
+#pdf("output/figures/clusters&singletons/singletons_largeScales.pdf", width=22,height=8)
+Plots_all_Indi_S <- lapply(AllIndi_S, PlotIndi_with_line)
+Plots_all_Indi_S
 dev.off()
 
-pdf("output/figures/clusters&singletons/clusters&singletons_strata.pdf", width=25,height=15)
-lapply(AllIndi_strata, PlotIndi_strata)
+# **** Save same plot as above but as individual png files 
+png("output/figures/clusters&singletons/cluster_1.png", width=1100,height=800, res=72)
+grid.arrange(PlotIndi_with_line(C1), PlotIndi_with_line(C1_nafo))
+dev.off()
+png("output/figures/clusters&singletons/cluster_2.png", width=1100,height=800, res=72)
+grid.arrange(PlotIndi_with_line(C2), PlotIndi_with_line(C2_nafo))
+dev.off()
+png("output/figures/clusters&singletons/cluster_3.png", width=1100,height=800, res=72)
+grid.arrange(PlotIndi_with_line(C3), PlotIndi_with_line(C3_nafo))
+dev.off()
+png("output/figures/clusters&singletons/cluster_4.png", width=1100,height=800, res=72)
+grid.arrange(PlotIndi_with_line(C4), PlotIndi_with_line(C4_nafo))
+dev.off()
+png("output/figures/clusters&singletons/cluster_5.png", width=1100,height=800, res=72)
+grid.arrange(PlotIndi_with_line(C5), PlotIndi_with_line(C5_nafo))
+dev.off()
+png("output/figures/clusters&singletons/cluster_6.png", width=1100,height=800, res=72)
+grid.arrange(PlotIndi_with_line(C6), PlotIndi_with_line(C6_nafo))
+dev.off()
+png("output/figures/clusters&singletons/cluster_7.png", width=1100,height=800, res=72)
+grid.arrange(PlotIndi_with_line(C7), PlotIndi_with_line(C7_nafo))
+dev.off()
+png("output/figures/clusters&singletons/cluster_8.png", width=1100,height=800, res=72)
+grid.arrange(PlotIndi_with_line(C8), PlotIndi_with_line(C8_nafo))
+dev.off()
+png("output/figures/clusters&singletons/cluster_9.png", width=1100,height=800, res=72)
+grid.arrange(PlotIndi_with_line(C9), PlotIndi_with_line(C9_nafo))
+dev.off()
+png("output/figures/clusters&singletons/cluster_10.png", width=1100,height=800, res=72)
+grid.arrange(PlotIndi_with_line(C10), PlotIndi_with_line(C10_nafo))
+dev.off()
+png("output/figures/clusters&singletons/cluster_11.png", width=1100,height=800, res=72)
+grid.arrange(PlotIndi_with_line(C11), PlotIndi_with_line(C11_nafo))
+dev.off()
+png("output/figures/clusters&singletons/cluster_12.png", width=1100,height=800, res=72)
+grid.arrange(PlotIndi_with_line(C12), PlotIndi_with_line(C12_nafo))
+dev.off()
+png("output/figures/clusters&singletons/cluster_13.png", width=1100,height=800, res=72)
+grid.arrange(PlotIndi_with_line(C13), PlotIndi_with_line(C13_nafo))
+dev.off()
+png("output/figures/clusters&singletons/cluster_14.png", width=1100,height=800, res=72)
+grid.arrange(PlotIndi_with_line(C14), PlotIndi_with_line(C14_nafo))
+dev.off()
+png("output/figures/clusters&singletons/cluster_15.png", width=1100,height=800, res=72)
+grid.arrange(PlotIndi_with_line(C15), PlotIndi_with_line(C15_nafo))
 dev.off()
 
-pdf("output/figures/clusters&singletons/clusters&singletons_strataScales_withPoints.pdf", width=25,height=15)
-lapply(AllIndi_strata, PlotIndi_strata_withdatapoints)
+
+# **** Save strata scale clusters ### # ---------------
+pdf("output/figures/clusters&singletons/clusters_strata.pdf", width=25,height=20)
+lapply(AllIndi_strata, PlotIndi_strata_withline)
+dev.off()
+
+# **** Save same plot as above but as individual png files 
+png("output/figures/clusters&singletons/cluster_a.png", width=1800,height=1200, res=72)
+PlotIndi_strata_withline(Ca)
+dev.off()
+png("output/figures/clusters&singletons/cluster_b.png", width=1800,height=1200, res=72)
+PlotIndi_strata_withline(Cb)
+dev.off()
+png("output/figures/clusters&singletons/cluster_c.png", width=1800,height=1200, res=72)
+PlotIndi_strata_withline(Cc)
+dev.off()
+png("output/figures/clusters&singletons/cluster_d.png", width=1800,height=1200, res=72)
+PlotIndi_strata_withline(Cd)
+dev.off()
+png("output/figures/clusters&singletons/cluster_e.png", width=1800,height=1200, res=72)
+PlotIndi_strata_withline(Ce)
+dev.off()
+png("output/figures/clusters&singletons/cluster_f.png", width=1800,height=1200, res=72)
+PlotIndi_strata_withline(Cf)
+dev.off()
+png("output/figures/clusters&singletons/cluster_g.png", width=1800,height=1200, res=72)
+PlotIndi_strata_withline(Cg)
+dev.off()
+png("output/figures/clusters&singletons/cluster_h.png", width=1800,height=1200, res=72)
+PlotIndi_strata_withline(Ch)
+dev.off()
+
+#pdf("output/figures/clusters&singletons/singletons_strata.pdf", width=25,height=20)
+lapply(AllIndi_S_strata, PlotIndi_strata_withline)
+dev.off()
+
+
+# --------SECTION VI Plot indi decoupled *****  #  ####
+#Indicators were decoupled using code in section 6 of ExtractIndicators/inst/START.R
+#Results were saved in RProjects\UseIndicators\data\decoupled q esswss
+
+BSkates_spp <- read.csv("C:/RProjects/UseIndicators/data/decoupled q esswss/BSkates_spp.csv",header=TRUE, na.strings = "NA", sep=",", as.is=T, strip.white=T)
+BSkates <- esswss_melt[esswss_melt$variable %in% c("BiomassSkates"), ]
+
+BClupeids_spp <- read.csv("C:/RProjects/UseIndicators/data/decoupled q esswss/BClupeids_spp.csv",header=TRUE, na.strings = "NA", sep=",", as.is=T, strip.white=T)
+BClupeids <- esswss_melt[esswss_melt$variable %in% c("BiomassClupeids"), ]
+
+BForage_spp <- read.csv("C:/RProjects/UseIndicators/data/decoupled q esswss/BForage_spp.csv",header=TRUE, na.strings = "NA", sep=",", as.is=T, strip.white=T)
+BForage <- esswss_melt[esswss_melt$variable %in% c("BiomassForage"), ]
+
+BPlanktivores_spp <- read.csv("C:/RProjects/UseIndicators/data/decoupled q esswss/BPlanktivores_spp.csv",header=TRUE, na.strings = "NA", sep=",", as.is=T, strip.white=T)
+BPlanktivores <- esswss_melt[esswss_melt$variable %in% c("BTGPlanktivore"), ]
+
+BPiscivores_spp <- read.csv("C:/RProjects/UseIndicators/data/decoupled q esswss/BPiscivores_spp.csv",header=TRUE, na.strings = "NA", sep=",", as.is=T, strip.white=T)
+BPiscivores <- esswss_melt[esswss_melt$variable %in% c("BTGPiscivore"), ]
+
+BGadoids_spp <- read.csv("C:/RProjects/UseIndicators/data/decoupled q esswss/BGadoids_spp.csv",header=TRUE, na.strings = "NA", sep=",", as.is=T, strip.white=T)
+BGadoids <- esswss_melt[esswss_melt$variable %in% c("BiomassGadoids"), ]
+
+BFlatfish_spp <- read.csv("C:/RProjects/UseIndicators/data/decoupled q esswss/BFlatfish_spp.csv",header=TRUE, na.strings = "NA", sep=",", as.is=T, strip.white=T)
+BFlatfish <- esswss_melt[esswss_melt$variable %in% c("BiomassFlatfish"), ]
+
+BZoopiscivores_spp <- read.csv("C:/RProjects/UseIndicators/data/decoupled q esswss/BZoopiscivores_spp.csv",header=TRUE, na.strings = "NA", sep=",", as.is=T, strip.white=T)
+BZoopiscivores <- esswss_melt[esswss_melt$variable %in% c("BTGZoopiscivore"), ]
+
+BLargeBenthivore_spp <- read.csv("C:/RProjects/UseIndicators/data/decoupled q esswss/BLargeBenthivore_spp.csv",header=TRUE, na.strings = "NA", sep=",", as.is=T, strip.white=T)
+BLargeBenthivore <- esswss_melt[esswss_melt$variable %in% c("BTGLargeBenthivore"), ]
+
+BMediumBenthivore_spp <- read.csv("C:/RProjects/UseIndicators/data/decoupled q esswss/BMediumBenthivore_spp.csv",header=TRUE, na.strings = "NA", sep=",", as.is=T, strip.white=T)
+BMediumBenthivore <- esswss_melt[esswss_melt$variable %in% c("BTGMediumBenthivore"), ]
+
+pdf("C:/RProjects/UseIndicators/output/figures/decoupled/decoupledIndi.pdf", width=14,height=8)
+# PlotIndi_with_line(BClupeids)
+# PlotDecoupledIndi(BClupeids_spp)
+PlotDecoupledIndi_with_area(BClupeids_spp, BClupeids)
+PlotDecoupledIndi_with_area(BForage_spp, BForage)
+PlotDecoupledIndi_with_area(BPlanktivores_spp, BPlanktivores)
+PlotDecoupledIndi_with_area(BPiscivores_spp, BPiscivores)
+PlotDecoupledIndi_with_area(BGadoids_spp, BGadoids)
+PlotDecoupledIndi_with_area(BSkates_spp, BSkates)
+PlotDecoupledIndi_with_area(BLargeBenthivore_spp, BLargeBenthivore)
+PlotDecoupledIndi_with_area(BMediumBenthivore_spp, BMediumBenthivore)
+PlotDecoupledIndi_with_area(BFlatfish_spp, BFlatfish)
+PlotDecoupledIndi_with_area(BZoopiscivores_spp, BZoopiscivores)
+dev.off()
+
+
+
+
+
+# --------SECTION VII Plot final suite of indi per attribute *****  #  ####
+
+Biodiv_shelf <- shelf_melt[shelf_melt$variable %in% c("MargalefRichness_s",
+                                                "ShannonDiversity_s"), ]
+
+Biodiv_ess <- ess_melt[ess_melt$variable %in% c("MargalefRichness_s",
+                                               "ShannonDiversity_s"), ]
+
+Biodiv_wss <- wss_melt[wss_melt$variable %in% c("MargalefRichness_s",
+                                                  "ShannonDiversity_s"), ]
+
+Biodiv_nafo4vn <- nafo4vn_melt[nafo4vn_melt$variable %in% c("MargalefRichness_s",
+                                                  "ShannonDiversity_s"), ]
+
+Biodiv_nafo4vs <- nafo4vs_melt[nafo4vs_melt$variable %in% c("MargalefRichness_s",
+                                                  "ShannonDiversity_s"), ]
+
+Biodiv_nafo4w <- nafo4w_melt[nafo4w_melt$variable %in% c("MargalefRichness_s",
+                                                  "ShannonDiversity_s"), ]
+
+Biodiv_nafo4x <- nafo4x_melt[nafo4x_melt$variable %in% c("MargalefRichness_s",
+                                                  "ShannonDiversity_s"), ]
+
+Biodiv  <-  list(Biodiv_shelf,Biodiv_ess,Biodiv_wss,Biodiv_nafo4vn,Biodiv_nafo4vs,Biodiv_nafo4w, Biodiv_nafo4x)
+
+pdf("output/figures/Biodiversity.pdf", width=10,height=8)
+lapply(Biodiv, PlotIndi_with_line)
+dev.off()
+
+
+StrFc1_shelf <- shelf_melt[shelf_melt$variable %in% c("LargeFishIndicator_s",
+                                                      "MeanLengthAbundance_s",
+                                                      "MeanLengthBiomass_s"), ]
+
+StrFc1_ess <- ess_melt[ess_melt$variable %in% c("LargeFishIndicator_s",
+                                               "MeanLengthAbundance_s",
+                                               "MeanLengthBiomass_s"), ]
+
+StrFc1_wss <- wss_melt[wss_melt$variable %in% c("LargeFishIndicator_s",
+                                               "MeanLengthAbundance_s",
+                                               "MeanLengthBiomass_s"), ]
+
+StrFc1_nafo4vn <- nafo4vn_melt[nafo4vn_melt$variable %in% c("LargeFishIndicator_s",
+                                                           "MeanLengthAbundance_s",
+                                                           "MeanLengthBiomass_s"), ]
+
+StrFc1_nafo4vs <- nafo4vs_melt[nafo4vs_melt$variable %in% c("LargeFishIndicator_s",
+                                                           "MeanLengthAbundance_s",
+                                                           "MeanLengthBiomass_s"), ]
+
+StrFc1_nafo4w <- nafo4w_melt[nafo4w_melt$variable %in% c("LargeFishIndicator_s",
+                                                        "MeanLengthAbundance_s",
+                                                        "MeanLengthBiomass_s"), ]
+
+StrFc1_nafo4x <- nafo4x_melt[nafo4x_melt$variable %in% c("LargeFishIndicator_s",
+                                                      "MeanLengthAbundance_s",
+                                                      "MeanLengthBiomass_s"), ]
+
+StrFc2_shelf <- shelf_melt[shelf_melt$variable %in% c("CommunityCondition_s",
+                                                     "CCPiscivore_s",
+                                                     "CCZoopiscivore_s"), ]
+
+StrFc2_ess <- ess_melt[ess_melt$variable %in% c("CommunityCondition_s",
+                                                "CCPiscivore_s",
+                                                "CCZoopiscivore_s"), ]
+
+StrFc2_wss <- wss_melt[wss_melt$variable %in% c("CommunityCondition_s",
+                                                "CCPiscivore_s",
+                                                "CCZoopiscivore_s"), ]
+
+StrFc2_nafo4vn <- nafo4vn_melt[nafo4vn_melt$variable %in% c("CommunityCondition_s",
+                                                            "CCPiscivore_s",
+                                                            "CCZoopiscivore_s"), ]
+
+StrFc2_nafo4vs <- nafo4vs_melt[nafo4vs_melt$variable %in% c("CommunityCondition_s",
+                                                            "CCPiscivore_s",
+                                                            "CCZoopiscivore_s"), ]
+
+StrFc2_nafo4w <- nafo4w_melt[nafo4w_melt$variable %in% c("CommunityCondition_s",
+                                                         "CCPiscivore_s",
+                                                         "CCZoopiscivore_s"), ]
+
+StrFc2_nafo4x <- nafo4x_melt[nafo4x_melt$variable %in% c("CommunityCondition_s",
+                                                         "CCPiscivore_s",
+                                                         "CCZoopiscivore_s"), ]
+
+StrFc2 <- list(StrFc2_shelf,StrFc2_ess,StrFc2_wss,StrFc2_nafo4vn,StrFc2_nafo4vs,StrFc2_nafo4w, StrFc2_nafo4x)
+
+
+StrFc3_shelf <- shelf_melt[shelf_melt$variable %in% c("CCMediumBenthivore_s",
+                                                      "CCLargeBenthivore_s"), ]
+
+StrFc3_ess <- ess_melt[ess_melt$variable %in% c("CCMediumBenthivore_s",
+                                                "CCLargeBenthivore_s"), ]
+
+StrFc3_wss <- wss_melt[wss_melt$variable %in% c("CCMediumBenthivore_s",
+                                                "CCLargeBenthivore_s"), ]
+
+StrFc3_nafo4vn <- nafo4vn_melt[nafo4vn_melt$variable %in% c("CCMediumBenthivore_s",
+                                                            "CCLargeBenthivore_s"), ]
+
+StrFc3_nafo4vs <- nafo4vs_melt[nafo4vs_melt$variable %in% c("CCMediumBenthivore_s",
+                                                            "CCLargeBenthivore_s"), ]
+
+StrFc3_nafo4w <- nafo4w_melt[nafo4w_melt$variable %in% c("CCMediumBenthivore_s",
+                                                         "CCLargeBenthivore_s"), ]
+
+StrFc3_nafo4x <- nafo4x_melt[nafo4x_melt$variable %in% c("CCMediumBenthivore_s",
+                                                         "CCLargeBenthivore_s"), ]
+
+#
+
+StrFc4_shelf <- shelf_melt[shelf_melt$variable %in% c("MeanTrophicLevel_s",
+                                                      "BInvertebrateToDemersal_s",
+                                                      "BPelagicToDemersal_s"), ]
+
+StrFc4_ess <- ess_melt[ess_melt$variable %in% c("MeanTrophicLevel_s",
+                                                "BInvertebrateToDemersal_s",
+                                                "BPelagicToDemersal_s"), ]
+
+StrFc4_wss <- wss_melt[wss_melt$variable %in% c("MeanTrophicLevel_s",
+                                                "BInvertebrateToDemersal_s",
+                                                "BPelagicToDemersal_s"), ]
+
+StrFc4_nafo4vn <- nafo4vn_melt[nafo4vn_melt$variable %in% c("MeanTrophicLevel_s",
+                                                            "BInvertebrateToDemersal_s",
+                                                            "BPelagicToDemersal_s"), ]
+
+StrFc4_nafo4vs <- nafo4vs_melt[nafo4vs_melt$variable %in% c("MeanTrophicLevel_s",
+                                                            "BInvertebrateToDemersal_s",
+                                                            "BPelagicToDemersal_s"), ]
+
+StrFc4_nafo4w <- nafo4w_melt[nafo4w_melt$variable %in% c("MeanTrophicLevel_s",
+                                                         "BInvertebrateToDemersal_s",
+                                                         "BPelagicToDemersal_s"), ]
+
+StrFc4_nafo4x <- nafo4x_melt[nafo4x_melt$variable %in% c("MeanTrophicLevel_s",
+                                                         "BInvertebrateToDemersal_s",
+                                                         "BPelagicToDemersal_s"), ]
+
+#
+StrFc5_shelf <- shelf_melt[shelf_melt$variable %in% c("BTGPlanktivore_s",
+                                                      "BTGPiscivore_s",
+                                                      "BTGZoopiscivore_s"), ]
+
+StrFc5_ess <- ess_melt[ess_melt$variable %in% c("BTGPlanktivore_s",
+                                                "BTGPiscivore_s",
+                                                "BTGZoopiscivore_s"), ]
+
+StrFc5_wss <- wss_melt[wss_melt$variable %in% c("BTGPlanktivore_s",
+                                                "BTGPiscivore_s",
+                                                "BTGZoopiscivore_s"), ]
+
+StrFc5_nafo4vn <- nafo4vn_melt[nafo4vn_melt$variable %in% c("BTGPlanktivore_s",
+                                                            "BTGPiscivore_s",
+                                                            "BTGZoopiscivore_s"), ]
+
+StrFc5_nafo4vs <- nafo4vs_melt[nafo4vs_melt$variable %in% c("BTGPlanktivore_s",
+                                                            "BTGPiscivore_s",
+                                                            "BTGZoopiscivore_s"), ]
+
+StrFc5_nafo4w <- nafo4w_melt[nafo4w_melt$variable %in% c("BTGPlanktivore_s",
+                                                         "BTGPiscivore_s",
+                                                         "BTGZoopiscivore_s"), ]
+
+StrFc5_nafo4x <- nafo4x_melt[nafo4x_melt$variable %in% c("BTGPlanktivore_s",
+                                                         "BTGPiscivore_s",
+                                                         "BTGZoopiscivore_s"), ]
+
+#
+StrFc6_shelf <- shelf_melt[shelf_melt$variable %in% c("BTGLargeBenthivore_s",
+                                                      "BTGMediumBenthivore_s"), ]
+
+StrFc6_ess <- ess_melt[ess_melt$variable %in% c("BTGLargeBenthivore_s",
+                                                "BTGMediumBenthivore_s"), ]
+
+StrFc6_wss <- wss_melt[wss_melt$variable %in% c("BTGLargeBenthivore_s",
+                                                "BTGMediumBenthivore_s"), ]
+
+StrFc6_nafo4vn <- nafo4vn_melt[nafo4vn_melt$variable %in% c("BTGLargeBenthivore_s",
+                                                            "BTGMediumBenthivore_s"), ]
+
+StrFc6_nafo4vs <- nafo4vs_melt[nafo4vs_melt$variable %in% c("BTGLargeBenthivore_s",
+                                                            "BTGMediumBenthivore_s"), ]
+
+StrFc6_nafo4w <- nafo4w_melt[nafo4w_melt$variable %in% c("BTGLargeBenthivore_s",
+                                                         "BTGMediumBenthivore_s"), ]
+
+StrFc6_nafo4x <- nafo4x_melt[nafo4x_melt$variable %in% c("BTGLargeBenthivore_s",
+                                                         "BTGMediumBenthivore_s"), ]
+
+
+StrFc <- list(StrFc1_shelf,StrFc1_ess,StrFc1_wss,StrFc1_nafo4vn,StrFc1_nafo4vs,StrFc1_nafo4w, StrFc1_nafo4x,
+               StrFc2_shelf,StrFc2_ess,StrFc2_wss,StrFc2_nafo4vn,StrFc2_nafo4vs,StrFc2_nafo4w, StrFc2_nafo4x,
+               StrFc3_shelf,StrFc3_ess,StrFc3_wss,StrFc3_nafo4vn,StrFc3_nafo4vs,StrFc3_nafo4w, StrFc3_nafo4x,
+               StrFc4_shelf,StrFc4_ess,StrFc4_wss,StrFc4_nafo4vn,StrFc4_nafo4vs,StrFc4_nafo4w, StrFc4_nafo4x,
+               StrFc5_shelf,StrFc5_ess,StrFc5_wss,StrFc5_nafo4vn,StrFc5_nafo4vs,StrFc5_nafo4w, StrFc5_nafo4x,
+               StrFc6_shelf,StrFc6_ess,StrFc6_wss,StrFc6_nafo4vn,StrFc6_nafo4vs,StrFc6_nafo4w, StrFc6_nafo4x)
+
+pdf("output/figures/Structure&Functioning.pdf", width=10,height=8)
+lapply(StrFc, PlotIndi_with_line)
+dev.off()
+
+
+StR1_shelf <- shelf_melt[shelf_melt$variable %in% c("MeanLifespan_s",
+                                                      "Intrinsicvulnerabilityindex.L_s"), ]
+
+StR1_ess <- ess_melt[ess_melt$variable %in% c("MeanLifespan_s",
+                                              "Intrinsicvulnerabilityindex.L_s"), ]
+
+StR1_wss <- wss_melt[wss_melt$variable %in% c("MeanLifespan_s",
+                                              "Intrinsicvulnerabilityindex.L_s"), ]
+
+StR1_nafo4vn <- nafo4vn_melt[nafo4vn_melt$variable %in% c("MeanLifespan_s",
+                                                          "Intrinsicvulnerabilityindex.L_s"), ]
+
+StR1_nafo4vs <- nafo4vs_melt[nafo4vs_melt$variable %in% c("MeanLifespan_s",
+                                                          "Intrinsicvulnerabilityindex.L_s"), ]
+
+StR1_nafo4w <- nafo4w_melt[nafo4w_melt$variable %in% c("MeanLifespan_s",
+                                                       "Intrinsicvulnerabilityindex.L_s"), ]
+
+StR1_nafo4x <- nafo4x_melt[nafo4x_melt$variable %in% c("MeanLifespan_s",
+                                                       "Intrinsicvulnerabilityindex.L_s"), ]
+
+#
+StR2_shelf <- shelf_melt[shelf_melt$variable %in% c("MMLengthAbundance_s",
+                                                    "MMLengthBiomass_s"), ]
+
+StR2_ess <- ess_melt[ess_melt$variable %in% c("MMLengthAbundance_s",
+                                              "MMLengthBiomass_s"), ]
+
+StR2_wss <- wss_melt[wss_melt$variable %in% c("MMLengthAbundance_s",
+                                              "MMLengthBiomass_s"), ]
+
+StR2_nafo4vn <- nafo4vn_melt[nafo4vn_melt$variable %in% c("MMLengthAbundance_s",
+                                                          "MMLengthBiomass_s"), ]
+
+StR2_nafo4vs <- nafo4vs_melt[nafo4vs_melt$variable %in% c("MMLengthAbundance_s",
+                                                          "MMLengthBiomass_s"), ]
+
+StR2_nafo4w <- nafo4w_melt[nafo4w_melt$variable %in% c("MMLengthAbundance_s",
+                                                       "MMLengthBiomass_s"), ]
+
+StR2_nafo4x <- nafo4x_melt[nafo4x_melt$variable %in% c("MMLengthAbundance_s",
+                                                       "MMLengthBiomass_s"), ]
+
+#
+StR3_shelf <- shelf_melt[shelf_melt$variable %in% c("InverseCVBiomass_s"), ]
+
+StR3_ess <- ess_melt[ess_melt$variable %in% c("InverseCVBiomass_s"), ]
+
+StR3_wss <- wss_melt[wss_melt$variable %in% c("InverseCVBiomass_s"), ]
+
+StR3_nafo4vn <- nafo4vn_melt[nafo4vn_melt$variable %in% c("InverseCVBiomass_s"), ]
+
+StR3_nafo4vs <- nafo4vs_melt[nafo4vs_melt$variable %in% c("InverseCVBiomass_s"), ]
+
+StR3_nafo4w <- nafo4w_melt[nafo4w_melt$variable %in% c("InverseCVBiomass_s"), ]
+
+StR3_nafo4x <- nafo4x_melt[nafo4w_melt$variable %in% c("InverseCVBiomass_s"), ]
+#
+
+StR <- list(StR1_shelf,StR1_ess,StR1_wss,StR1_nafo4vn,StR1_nafo4vs,StR1_nafo4w, StR1_nafo4x,
+              StR2_shelf,StR2_ess,StR2_wss,StR2_nafo4vn,StR2_nafo4vs,StR2_nafo4w, StR2_nafo4x,
+              StR3_shelf,StR3_ess,StR3_wss,StR3_nafo4vn,StR3_nafo4vs,StR3_nafo4w, StR3_nafo4x)
+
+pdf("output/figures/Stab&Resistance.pdf", width=10,height=8)
+lapply(StR, PlotIndi_with_line)
+dev.off()
+
+
+RP1_shelf <- shelf_melt[shelf_melt$variable %in% c("Biomass_s",
+                                                   "BiomassGroundfish_s",
+                                                   "BiomassFlatfish_s",
+                                                   "BiomassInvertebrates_s"), ]
+
+RP1_ess <- ess_melt[ess_melt$variable %in% c("Biomass_s",
+                                             "BiomassGroundfish_s",
+                                             "BiomassFlatfish_s",
+                                             "BiomassInvertebrates_s"), ]
+
+RP1_wss <- wss_melt[wss_melt$variable %in% c("Biomass_s",
+                                             "BiomassGroundfish_s",
+                                             "BiomassFlatfish_s",
+                                             "BiomassInvertebrates_s"), ]
+
+RP1_nafo4vn <- nafo4vn_melt[nafo4vn_melt$variable %in% c("Biomass_s",
+                                                         "BiomassGroundfish_s",
+                                                         "BiomassFlatfish_s",
+                                                         "BiomassInvertebrates_s"), ]
+
+RP1_nafo4vs <- nafo4vs_melt[nafo4vs_melt$variable %in% c("Biomass_s",
+                                                         "BiomassGroundfish_s",
+                                                         "BiomassFlatfish_s",
+                                                         "BiomassInvertebrates_s"), ]
+
+RP1_nafo4w <- nafo4w_melt[nafo4w_melt$variable %in% c("Biomass_s",
+                                                      "BiomassGroundfish_s",
+                                                      "BiomassFlatfish_s",
+                                                      "BiomassInvertebrates_s"), ]
+
+RP1_nafo4x <- nafo4x_melt[nafo4x_melt$variable %in% c("Biomass_s",
+                                                      "BiomassGroundfish_s",
+                                                      "BiomassFlatfish_s",
+                                                      "BiomassInvertebrates_s"), ]
+
+#
+RP2_shelf <- shelf_melt[shelf_melt$variable %in% c("BiomassSkates_s",
+                                                   "MeanTrophicLevel.L_s"), ]
+
+RP2_ess <- ess_melt[ess_melt$variable %in% c("BiomassSkates_s",
+                                             "MeanTrophicLevel.L_s"), ]
+
+RP2_wss <- wss_melt[wss_melt$variable %in% c("BiomassSkates_s",
+                                             "MeanTrophicLevel.L_s"), ]
+
+RP2_nafo4vn <- nafo4vn_melt[nafo4vn_melt$variable %in% c("BiomassSkates_s",
+                                                         "MeanTrophicLevel.L_s"), ]
+
+RP2_nafo4vs <- nafo4vs_melt[nafo4vs_melt$variable %in% c("BiomassSkates_s",
+                                                         "MeanTrophicLevel.L_s"), ]
+
+RP2_nafo4w <- nafo4w_melt[nafo4w_melt$variable %in% c("BiomassSkates_s",
+                                                      "MeanTrophicLevel.L_s"), ]
+
+RP2_nafo4x <- nafo4x_melt[nafo4x_melt$variable %in% c("BiomassSkates_s",
+                                                      "MeanTrophicLevel.L_s"), ]
+
+RP <- list(RP1_shelf,RP1_ess,RP1_wss,RP1_nafo4vn,RP1_nafo4vs,RP1_nafo4w, RP1_nafo4x,
+            RP2_shelf,RP2_ess,RP2_wss,RP2_nafo4vn,RP2_nafo4vs,RP2_nafo4w, RP2_nafo4x)
+
+pdf("output/figures/ResourcePotential.pdf", width=10,height=8)
+lapply(RP, PlotIndi_with_line)
+dev.off()
+
+#
+
+FP1_shelf <- shelf_melt[shelf_melt$variable %in% c("FishingPressure.L_s",
+                                                   "FPClupeids.L_s"), ]
+
+FP1_ess <- ess_melt[ess_melt$variable %in% c("FishingPressure.L_s",
+                                             "FPClupeids.L_s"), ]
+
+FP1_wss <- wss_melt[wss_melt$variable %in% c("FishingPressure.L_s",
+                                             "FPClupeids.L_s"), ]
+
+FP1_nafo4vn <- nafo4vn_melt[nafo4vn_melt$variable %in% c("FishingPressure.L_s",
+                                                         "FPClupeids.L_s"), ]
+
+FP1_nafo4vs <- nafo4vs_melt[nafo4vs_melt$variable %in% c("FishingPressure.L_s",
+                                                         "FPClupeids.L_s"), ]
+
+FP1_nafo4w <- nafo4w_melt[nafo4w_melt$variable %in% c("FishingPressure.L_s",
+                                                      "FPClupeids.L_s"), ]
+
+FP1_nafo4x <- nafo4x_melt[nafo4x_melt$variable %in% c("FishingPressure.L_s",
+                                                      "FPClupeids.L_s"), ]
+#
+
+FP2_shelf <- shelf_melt[shelf_melt$variable %in% c("MeanTrophicLevel.L_s",
+                                                   "MarineTrophicIndex.L_s",
+                                                   "DiversityTargetSpp.L_s"), ]
+
+FP2_ess <- ess_melt[ess_melt$variable %in% c("MeanTrophicLevel.L_s",
+                                             "MarineTrophicIndex.L_s",
+                                             "DiversityTargetSpp.L_s"), ]
+
+FP2_wss <- wss_melt[wss_melt$variable %in% c("MeanTrophicLevel.L_s",
+                                             "MarineTrophicIndex.L_s",
+                                             "DiversityTargetSpp.L_s"), ]
+
+FP2_nafo4vn <- nafo4vn_melt[nafo4vn_melt$variable %in% c("MeanTrophicLevel.L_s",
+                                                         "MarineTrophicIndex.L_s",
+                                                         "DiversityTargetSpp.L_s"), ]
+
+FP2_nafo4vs <- nafo4vs_melt[nafo4vs_melt$variable %in% c("MeanTrophicLevel.L_s",
+                                                         "MarineTrophicIndex.L_s",
+                                                         "DiversityTargetSpp.L_s"), ]
+
+FP2_nafo4w <- nafo4w_melt[nafo4w_melt$variable %in% c("MeanTrophicLevel.L_s",
+                                                      "MarineTrophicIndex.L_s",
+                                                      "DiversityTargetSpp.L_s"), ]
+
+FP2_nafo4x <- nafo4x_melt[nafo4x_melt$variable %in% c("MeanTrophicLevel.L_s",
+                                                      "MarineTrophicIndex.L_s",
+                                                      "DiversityTargetSpp.L_s"), ]
+#
+
+
+FP3_shelf <- shelf_melt[shelf_melt$variable %in% c("Landings.L_s",
+                                                   "LSkates.L_s",
+                                                   "LFlatfish.L_s"), ]
+
+FP3_ess <- ess_melt[ess_melt$variable %in% c("Landings.L_s",
+                                             "LSkates.L_s",
+                                             "LFlatfish.L_s"), ]
+
+FP3_wss <- wss_melt[wss_melt$variable %in% c("Landings.L_s",
+                                             "LSkates.L_s",
+                                             "LFlatfish.L_s"), ]
+
+FP3_nafo4vn <- nafo4vn_melt[nafo4vn_melt$variable %in% c("Landings.L_s",
+                                                         "LSkates.L_s",
+                                                         "LFlatfish.L_s"), ]
+
+FP3_nafo4vs <- nafo4vs_melt[nafo4vs_melt$variable %in% c("Landings.L_s",
+                                                         "LSkates.L_s",
+                                                         "LFlatfish.L_s"), ]
+
+FP3_nafo4w <- nafo4w_melt[nafo4w_melt$variable %in% c("Landings.L_s",
+                                                      "LSkates.L_s",
+                                                      "LFlatfish.L_s"), ]
+
+FP3_nafo4x <- nafo4x_melt[nafo4x_melt$variable %in% c("Landings.L_s",
+                                                      "LSkates.L_s",
+                                                      "LFlatfish.L_s"), ]
+#
+
+FP4_shelf <- shelf_melt[shelf_melt$variable %in% c("LLargePelagic.L_s",
+                                                   "DiversityTargetSpp.L_s"), ]
+
+FP4_ess <- ess_melt[ess_melt$variable %in% c("LLargePelagic.L_s",
+                                             "DiversityTargetSpp.L_s"), ]
+
+FP4_wss <- wss_melt[wss_melt$variable %in% c("LLargePelagic.L_s",
+                                             "DiversityTargetSpp.L_s"), ]
+
+FP4_nafo4vn <- nafo4vn_melt[nafo4vn_melt$variable %in% c("LLargePelagic.L_s",
+                                                         "DiversityTargetSpp.L_s"), ]
+
+FP4_nafo4vs <- nafo4vs_melt[nafo4vs_melt$variable %in% c("LLargePelagic.L_s",
+                                                         "DiversityTargetSpp.L_s"), ]
+
+FP4_nafo4w <- nafo4w_melt[nafo4w_melt$variable %in% c("LLargePelagic.L_s",
+                                                      "DiversityTargetSpp.L_s"), ]
+
+FP4_nafo4x <- nafo4x_melt[nafo4x_melt$variable %in% c("LLargePelagic.L_s",
+                                                      "DiversityTargetSpp.L_s"), ]
+
+
+FP <- list(FP1_shelf,FP1_ess,FP1_wss,FP1_nafo4vn,FP1_nafo4vs,FP1_nafo4w, FP1_nafo4x,
+           FP2_shelf,FP2_ess,FP2_wss,FP2_nafo4vn,FP2_nafo4vs,FP2_nafo4w, FP2_nafo4x,
+           FP3_shelf,FP3_ess,FP3_wss,FP3_nafo4vn,FP3_nafo4vs,FP3_nafo4w, FP3_nafo4x,
+           FP4_shelf,FP4_ess,FP4_wss,FP4_nafo4vn,FP4_nafo4vs,FP4_nafo4w, FP4_nafo4x)
+
+pdf("output/figures/FishingPressure.pdf", width=10,height=8)
+lapply(FP, PlotIndi_with_line)
+dev.off()
+
+#######################
+#Plotting indicators that were filtered out
+Shelf_Q_without_interpolationORfilters <- stdizeFrame(SS)
+Shelf_Q_without_interpolationORfilters$BiomassInvertebrates_s
+Shelf_Q_without_interpolationORfilters$BInvertebrateToDemersal_s
+
+esswss_without_interpolationORfilters <- stdizeFrame(Shelf_Q)
+ess_without_interpolationORfilters <- esswss_without_interpolationORfilters[esswss_without_interpolationORfilters$ID %in% c('ESS'), ]
+wss_without_interpolationORfilters <- esswss_without_interpolationORfilters[esswss_without_interpolationORfilters$ID %in% c('WSS'), ]
+
+nafo_without_interpolationORfilters <- stdizeFrame(IndiQ_NAFO)
+nafo4vn_without_interpolationORfilters <- nafo_without_interpolationORfilters[nafo_without_interpolationORfilters$ID %in% c('4VN'), ]
+nafo4vs_without_interpolationORfilters <- nafo_without_interpolationORfilters[nafo_without_interpolationORfilters$ID %in% c('4VS'), ]
+nafo4w_without_interpolationORfilters <- nafo_without_interpolationORfilters[nafo_without_interpolationORfilters$ID %in% c('4W'), ]
+nafo4x_without_interpolationORfilters <- nafo_without_interpolationORfilters[nafo_without_interpolationORfilters$ID %in% c('4X'), ]
+
+
+shelf_melt2 <- melt(Shelf_Q_without_interpolationORfilters, id=c('YEAR', 'ID'))
+ess_melt2 <- melt(ess_without_interpolationORfilters, id=c('YEAR', 'ID'))
+wss_melt2 <- melt(wss_without_interpolationORfilters, id=c('YEAR', 'ID'))
+nafo4vn_melt2 <- melt(nafo4vn_without_interpolationORfilters, id=c('YEAR', 'ID'))
+nafo4vs_melt2 <- melt(nafo4vs_without_interpolationORfilters, id=c('YEAR', 'ID'))
+nafo4w_melt2 <- melt(nafo4w_without_interpolationORfilters, id=c('YEAR', 'ID'))
+nafo4x_melt2 <- melt(nafo4x_without_interpolationORfilters, id=c('YEAR', 'ID'))
+
+
+Inv_shelf <- shelf_melt2[shelf_melt2$variable %in% c("BInvertebrateToDemersal_s"), ]
+
+Inv_ess <- ess_melt2[ess_melt2$variable %in% c("BInvertebrateToDemersal_s"), ]
+
+Inv_wss <- wss_melt2[wss_melt2$variable %in% c("BInvertebrateToDemersal_s"), ]
+
+Inv_nafo4vn <- nafo4vn_melt2[nafo4vn_melt2$variable %in% c("BInvertebrateToDemersal_s"), ]
+
+Inv_nafo4vs <- nafo4vs_melt2[nafo4vs_melt2$variable %in% c("BInvertebrateToDemersal_s"), ]
+
+Inv_nafo4w <- nafo4w_melt2[nafo4w_melt2$variable %in% c("BInvertebrateToDemersal_s"), ]
+
+Inv_nafo4x <- nafo4x_melt2[nafo4x_melt2$variable %in% c("BInvertebrateToDemersal_s"), ]
+
+#
+
+Inv2_shelf <- shelf_melt2[shelf_melt2$variable %in% c("FPInvertebrates.L_s"), ]
+
+Inv2_ess <- ess_melt2[ess_melt2$variable %in% c("FPInvertebrates.L_s"), ]
+
+Inv2_wss <- wss_melt2[wss_melt2$variable %in% c("FPInvertebrates.L_s"), ]
+
+Inv2_nafo4vn <- nafo4vn_melt2[nafo4vn_melt2$variable %in% c("FPInvertebrates.L_s"), ]
+
+Inv2_nafo4vs <- nafo4vs_melt2[nafo4vs_melt2$variable %in% c("FPInvertebrates.L_s"), ]
+
+Inv2_nafo4w <- nafo4w_melt2[nafo4w_melt2$variable %in% c("FPInvertebrates.L_s"), ]
+
+Inv2_nafo4x <- nafo4x_melt2[nafo4x_melt2$variable %in% c("FPInvertebrates.L_s"), ]
+
+#
+
+Inv3_shelf <- shelf_melt2[shelf_melt2$variable %in% c("BiomassInvertebrates_s"), ]
+
+Inv3_ess <- ess_melt2[ess_melt2$variable %in% c("BiomassInvertebrates_s"), ]
+
+Inv3_wss <- wss_melt2[wss_melt2$variable %in% c("BiomassInvertebrates_s"), ]
+
+Inv3_nafo4vn <- nafo4vn_melt2[nafo4vn_melt2$variable %in% c("BiomassInvertebrates_s"), ]
+
+Inv3_nafo4vs <- nafo4vs_melt2[nafo4vs_melt2$variable %in% c("BiomassInvertebrates_s"), ]
+
+Inv3_nafo4w <- nafo4w_melt2[nafo4w_melt2$variable %in% c("BiomassInvertebrates_s"), ]
+
+Inv3_nafo4x <- nafo4x_melt2[nafo4x_melt2$variable %in% c("BiomassInvertebrates_s"), ]
+
+Inv <- list(Inv_shelf, Inv_ess, Inv_wss,Inv_nafo4vn,Inv_nafo4vs,Inv_nafo4w, Inv_nafo4x,
+            Inv2_shelf, Inv2_ess, Inv2_wss,Inv2_nafo4vn,Inv2_nafo4vs,Inv2_nafo4w, Inv2_nafo4x,
+            Inv3_shelf, Inv3_ess, Inv3_wss,Inv3_nafo4vn,Inv3_nafo4vs,Inv3_nafo4w, Inv3_nafo4x)
+
+pdf("output/figures/Invertebrates.pdf", width=10,height=8)
+lapply(Inv, PlotIndi_with_line)
 dev.off()
 
 
