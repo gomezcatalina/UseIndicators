@@ -929,60 +929,7 @@ lapply(AllIndi_S_strata, PlotIndi_strata_withline)
 dev.off()
 
 
-# --------SECTION VI Plot indi decoupled *****  #  ####
-#Indicators were decoupled using code in section 6 of ExtractIndicators/inst/START.R
-#Results were saved in RProjects\UseIndicators\data\decoupled q esswss
-
-BSkates_spp <- read.csv("C:/RProjects/UseIndicators/data/decoupled q esswss/BSkates_spp.csv",header=TRUE, na.strings = "NA", sep=",", as.is=T, strip.white=T)
-BSkates <- esswss_melt[esswss_melt$variable %in% c("BiomassSkates"), ]
-
-BClupeids_spp <- read.csv("C:/RProjects/UseIndicators/data/decoupled q esswss/BClupeids_spp.csv",header=TRUE, na.strings = "NA", sep=",", as.is=T, strip.white=T)
-BClupeids <- esswss_melt[esswss_melt$variable %in% c("BiomassClupeids"), ]
-
-BForage_spp <- read.csv("C:/RProjects/UseIndicators/data/decoupled q esswss/BForage_spp.csv",header=TRUE, na.strings = "NA", sep=",", as.is=T, strip.white=T)
-BForage <- esswss_melt[esswss_melt$variable %in% c("BiomassForage"), ]
-
-BPlanktivores_spp <- read.csv("C:/RProjects/UseIndicators/data/decoupled q esswss/BPlanktivores_spp.csv",header=TRUE, na.strings = "NA", sep=",", as.is=T, strip.white=T)
-BPlanktivores <- esswss_melt[esswss_melt$variable %in% c("BTGPlanktivore"), ]
-
-BPiscivores_spp <- read.csv("C:/RProjects/UseIndicators/data/decoupled q esswss/BPiscivores_spp.csv",header=TRUE, na.strings = "NA", sep=",", as.is=T, strip.white=T)
-BPiscivores <- esswss_melt[esswss_melt$variable %in% c("BTGPiscivore"), ]
-
-BGadoids_spp <- read.csv("C:/RProjects/UseIndicators/data/decoupled q esswss/BGadoids_spp.csv",header=TRUE, na.strings = "NA", sep=",", as.is=T, strip.white=T)
-BGadoids <- esswss_melt[esswss_melt$variable %in% c("BiomassGadoids"), ]
-
-BFlatfish_spp <- read.csv("C:/RProjects/UseIndicators/data/decoupled q esswss/BFlatfish_spp.csv",header=TRUE, na.strings = "NA", sep=",", as.is=T, strip.white=T)
-BFlatfish <- esswss_melt[esswss_melt$variable %in% c("BiomassFlatfish"), ]
-
-BZoopiscivores_spp <- read.csv("C:/RProjects/UseIndicators/data/decoupled q esswss/BZoopiscivores_spp.csv",header=TRUE, na.strings = "NA", sep=",", as.is=T, strip.white=T)
-BZoopiscivores <- esswss_melt[esswss_melt$variable %in% c("BTGZoopiscivore"), ]
-
-BLargeBenthivore_spp <- read.csv("C:/RProjects/UseIndicators/data/decoupled q esswss/BLargeBenthivore_spp.csv",header=TRUE, na.strings = "NA", sep=",", as.is=T, strip.white=T)
-BLargeBenthivore <- esswss_melt[esswss_melt$variable %in% c("BTGLargeBenthivore"), ]
-
-BMediumBenthivore_spp <- read.csv("C:/RProjects/UseIndicators/data/decoupled q esswss/BMediumBenthivore_spp.csv",header=TRUE, na.strings = "NA", sep=",", as.is=T, strip.white=T)
-BMediumBenthivore <- esswss_melt[esswss_melt$variable %in% c("BTGMediumBenthivore"), ]
-
-pdf("C:/RProjects/UseIndicators/output/figures/decoupled/decoupledIndi.pdf", width=14,height=8)
-# PlotIndi_with_line(BClupeids)
-# PlotDecoupledIndi(BClupeids_spp)
-PlotDecoupledIndi_with_area(BClupeids_spp, BClupeids)
-PlotDecoupledIndi_with_area(BForage_spp, BForage)
-PlotDecoupledIndi_with_area(BPlanktivores_spp, BPlanktivores)
-PlotDecoupledIndi_with_area(BPiscivores_spp, BPiscivores)
-PlotDecoupledIndi_with_area(BGadoids_spp, BGadoids)
-PlotDecoupledIndi_with_area(BSkates_spp, BSkates)
-PlotDecoupledIndi_with_area(BLargeBenthivore_spp, BLargeBenthivore)
-PlotDecoupledIndi_with_area(BMediumBenthivore_spp, BMediumBenthivore)
-PlotDecoupledIndi_with_area(BFlatfish_spp, BFlatfish)
-PlotDecoupledIndi_with_area(BZoopiscivores_spp, BZoopiscivores)
-dev.off()
-
-
-
-
-
-# --------SECTION VII Plot final suite of indi per attribute *****  #  ####
+# --------SECTION VI Plot final suite of indi per attribute *****  #  ####
 
 Biodiv_shelf <- shelf_melt[shelf_melt$variable %in% c("MargalefRichness_s",
                                                 "ShannonDiversity_s"), ]
