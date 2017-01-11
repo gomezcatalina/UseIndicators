@@ -626,6 +626,10 @@ C9_nafo <- nafo_melt[nafo_melt$variable %in% c("Biomass_s",
                                                 "BPelagicToDemersal_s",
                                                 "BTGPlanktivore_s"), ]
 
+C9_OnlyBiomass <- shelfesswss_melt[shelfesswss_melt$variable %in% c("Biomass_s"), ]
+
+C9_nafoOnlyBiomass <- nafo_melt[nafo_melt$variable %in% c("Biomass_s"), ]
+
 # #  C10
 C10 <- shelfesswss_melt[shelfesswss_melt$variable %in% c("FPFlatfish.L_s",
                                                          "LFlatfish.L_s"), ]
@@ -832,7 +836,7 @@ C1_2_3_10_nafo <- nafo_melt[nafo_melt$variable %in% c('LClupeids.L_s',
 # lapply(Other, PlotIndi)
 # lapply(Other, PlotIndi_with_datapoints)
 
- # **** Save strata scale clusters ### # ---------------
+ # **** Save strata scale clusters ###
 pdf("output/figures/clusters&singletons/clusters_largeScales.pdf", width=22,height=8)
 Plots_all_Indi <- lapply(AllIndi, PlotIndi_with_line)
 Plots_all_Indi
@@ -892,8 +896,12 @@ png("output/figures/clusters&singletons/cluster_15.png", width=1100,height=800, 
 grid.arrange(PlotIndi_with_line(C15), PlotIndi_with_line(C15_nafo))
 dev.off()
 
+png("output/figures/clusters&singletons/C9_OnlyBiomass.png", width=1100,height=800, res=72)
+grid.arrange(PlotIndi_with_line(C9_OnlyBiomass), PlotIndi_with_line(C9_nafoOnlyBiomass))
+dev.off()
 
-# **** Save strata scale clusters ### # ---------------
+
+# **** Save strata scale clusters 
 pdf("output/figures/clusters&singletons/clusters_strata.pdf", width=25,height=20)
 lapply(AllIndi_strata, PlotIndi_strata_withline)
 dev.off()
@@ -931,6 +939,212 @@ dev.off()
 
 # --------SECTION VI Plot final suite of indi per attribute *****  #  ####
 
+###################### Report card plots ### # ---------------
+
+##############################ESS*************************************************#
+MargalefRichness_ess <- ess_melt[ess_melt$variable %in% c("MargalefRichness"), ]
+ShannonDiversity_ess <- ess_melt[ess_melt$variable %in% c("ShannonDiversity"), ]
+png("output/figures/ReportCard/Biodiv_ess.png", width=850,height=420, res=72)
+grid.arrange(PlotIndi_with_line_noPanels(MargalefRichness_ess), PlotIndi_with_line_noPanels(ShannonDiversity_ess))
+dev.off()
+
+Biomass_ess <- ess_melt[ess_melt$variable %in% c("Biomass"), ]
+BiomassGroundfish_ess <- ess_melt[ess_melt$variable %in% c("BiomassGroundfish"), ]
+BiomassFlatfish_ess <- ess_melt[ess_melt$variable %in% c("BiomassFlatfish"), ]
+BiomassSkates_ess <- ess_melt[ess_melt$variable %in% c("BiomassSkates"), ]
+BiomassInvertebrates_ess <- ess_melt2[ess_melt2$variable %in% c("BiomassInvertebrates"), ]
+
+png("output/figures/ReportCard/ResourcePotential_1_ess.png", width=800,height=630, res=72)
+grid.arrange(PlotIndi_with_line_noPanels(BiomassInvertebrates_ess), 
+             PlotIndi_with_line_noPanels(BiomassFlatfish_ess),
+             PlotIndi_with_line_noPanels(BiomassSkates_ess))
+dev.off()
+png("output/figures/ReportCard/ResourcePotential_2_ess.png", width=800,height=420, res=72)
+grid.arrange(PlotIndi_with_line_noPanels(Biomass_ess), 
+             PlotIndi_with_line_noPanels(BiomassGroundfish_ess))
+dev.off()
+
+
+MeanLifespan_ess <- ess_melt[ess_melt$variable %in% c("MeanLifespan"), ]
+Intrinsicvulnerabilityindex_ess <- ess_melt[ess_melt$variable %in% c("Intrinsicvulnerabilityindex.L"), ]
+InverseCVBiomass_ess <- ess_melt[ess_melt$variable %in% c("InverseCVBiomass"), ]
+BiomassTL2_ess <- ess_melt[ess_melt$variable %in% c("BiomassTL2"), ]
+
+png("output/figures/ReportCard/St&RstoPert_ess.png", width=800,height=840, res=72)
+grid.arrange(PlotIndi_with_line_noPanels(MeanLifespan_ess), 
+             PlotIndi_with_line_noPanels(Intrinsicvulnerabilityindex_ess),
+             PlotIndi_with_line_noPanels(InverseCVBiomass_ess),
+             PlotIndi_with_line_noPanels(BiomassTL2_ess), ncol=1)
+dev.off()
+
+
+
+LargeFishIndicator_ess <- ess_melt[ess_melt$variable %in% c("LargeFishIndicator"), ]
+MeanLengthAbundance_ess <- ess_melt[ess_melt$variable %in% c("MeanLengthAbundance"), ]
+MeanTrophicLevel_ess <- ess_melt[ess_melt$variable %in% c("MeanTrophicLevel"), ]
+CommunityCondition_ess <- ess_melt[ess_melt$variable %in% c("CommunityCondition"), ]
+CCMediumBenthivore_ess <- ess_melt[ess_melt$variable %in% c("CCMediumBenthivore"), ]
+CCPiscivore_ess <- ess_melt[ess_melt$variable %in% c("CCPiscivore"), ]
+CCZoopiscivore_ess <- ess_melt[ess_melt$variable %in% c("CCZoopiscivore"), ]
+CCLargeBenthivore_ess <- ess_melt[ess_melt$variable %in% c("CCLargeBenthivore"), ]
+BInvertebrateToDemersal_ess <- ess_melt2[ess_melt2$variable %in% c("BInvertebrateToDemersal"), ]
+BTGZoopiscivore_ess <- ess_melt[ess_melt$variable %in% c("BTGZoopiscivore"), ]
+
+png("output/figures/ReportCard/St&Function_1_ess.png", width=800,height=630, res=72)
+grid.arrange(PlotIndi_with_line_noPanels(LargeFishIndicator_ess), 
+             PlotIndi_with_line_noPanels(MeanLengthAbundance_ess),
+             PlotIndi_with_line_noPanels(MeanTrophicLevel_ess), ncol=1)
+dev.off()
+
+png("output/figures/ReportCard/St&Function_2_ess.png", width=800,height=1060, res=72)
+grid.arrange(PlotIndi_with_line_noPanels(CommunityCondition_ess), 
+             PlotIndi_with_line_noPanels(CCPiscivore_ess),
+             PlotIndi_with_line_noPanels(CCZoopiscivore_ess),
+             PlotIndi_with_line_noPanels(CCMediumBenthivore_ess), 
+             PlotIndi_with_line_noPanels(CCLargeBenthivore_ess), ncol=1)
+dev.off()
+
+png("output/figures/ReportCard/St&Function_3_ess.png", width=800,height=420, res=72)
+grid.arrange(PlotIndi_with_line_noPanels(BInvertebrateToDemersal_ess), 
+             PlotIndi_with_line_noPanels(BTGZoopiscivore_ess))
+dev.off()
+
+
+
+FishingPressure.L_ess <- ess_melt[ess_melt$variable %in% c("FishingPressure.L"), ]
+FPClupeids.L_ess <- ess_melt[ess_melt$variable %in% c("FPClupeids.L"), ]
+FPInvertebrates.L_ess <- ess_melt2[ess_melt2$variable %in% c("FPInvertebrates.L"), ]
+MeanTrophicLevel.L_ess <- ess_melt[ess_melt$variable %in% c("MeanTrophicLevel.L"), ]
+MarineTrophicIndex.L_ess <- ess_melt[ess_melt$variable %in% c("MarineTrophicIndex.L"), ]
+DiversityTargetSpp.L_ess <- ess_melt[ess_melt$variable %in% c("DiversityTargetSpp.L"), ]
+Landings.L_ess <- ess_melt[ess_melt$variable %in% c("Landings.L"), ]
+LSkates.L_ess <- ess_melt[ess_melt$variable %in% c("LSkates.L"), ]
+LFlatfish.L_ess <- ess_melt[ess_melt$variable %in% c("LFlatfish.L"), ]
+LLargePelagic.L_ess <- ess_melt[ess_melt$variable %in% c("LLargePelagic.L"), ]
+
+png("output/figures/ReportCard/FishingPressure_1_ess.png", width=800,height=630, res=72)
+grid.arrange(PlotIndi_with_line_noPanels(FishingPressure.L_ess), 
+             PlotIndi_with_line_noPanels(FPClupeids.L_ess),
+             PlotIndi_with_line_noPanels(FPInvertebrates.L_ess), ncol=1)
+dev.off()
+
+png("output/figures/ReportCard/FishingPressure_2_ess.png", width=800,height=840, res=72)
+grid.arrange(PlotIndi_with_line_noPanels(Landings.L_ess), 
+             PlotIndi_with_line_noPanels(LSkates.L_ess),
+             PlotIndi_with_line_noPanels(LFlatfish.L_ess),
+             PlotIndi_with_line_noPanels(LLargePelagic.L_ess), ncol=1)
+dev.off()
+
+png("output/figures/ReportCard/FishingPressure_3_ess.png", width=800,height=630, res=72)
+grid.arrange(PlotIndi_with_line_noPanels(MeanTrophicLevel.L_ess), 
+             PlotIndi_with_line_noPanels(MarineTrophicIndex.L_ess),
+             PlotIndi_with_line_noPanels(DiversityTargetSpp.L_ess), ncol=1)
+dev.off()
+
+##############################WSS*************************************************#
+
+MargalefRichness_wss <- wss_melt[wss_melt$variable %in% c("MargalefRichness"), ]
+ShannonDiversity_wss <- wss_melt[wss_melt$variable %in% c("ShannonDiversity"), ]
+png("output/figures/ReportCard/Biodiv_wss.png", width=850,height=420, res=72)
+grid.arrange(PlotIndi_with_line_noPanels(MargalefRichness_wss), PlotIndi_with_line_noPanels(ShannonDiversity_wss))
+dev.off()
+
+Biomass_wss <- wss_melt[wss_melt$variable %in% c("Biomass"), ]
+BiomassGroundfish_wss <- wss_melt[wss_melt$variable %in% c("BiomassGroundfish"), ]
+BiomassFlatfish_wss <- wss_melt[wss_melt$variable %in% c("BiomassFlatfish"), ]
+BiomassSkates_wss <- wss_melt[wss_melt$variable %in% c("BiomassSkates"), ]
+BiomassInvertebrates_wss <- wss_melt2[wss_melt2$variable %in% c("BiomassInvertebrates"), ]
+
+png("output/figures/ReportCard/ResourcePotential_1_wss.png", width=800,height=630, res=72)
+grid.arrange(PlotIndi_with_line_noPanels(BiomassInvertebrates_wss), 
+             PlotIndi_with_line_noPanels(BiomassFlatfish_wss),
+             PlotIndi_with_line_noPanels(BiomassSkates_wss))
+dev.off()
+png("output/figures/ReportCard/ResourcePotential_2_wss.png", width=800,height=420, res=72)
+grid.arrange(PlotIndi_with_line_noPanels(Biomass_wss), 
+             PlotIndi_with_line_noPanels(BiomassGroundfish_wss))
+dev.off()
+
+
+MeanLifespan_wss <- wss_melt[wss_melt$variable %in% c("MeanLifespan"), ]
+Intrinsicvulnerabilityindex_wss <- wss_melt[wss_melt$variable %in% c("Intrinsicvulnerabilityindex.L"), ]
+InverseCVBiomass_wss <- wss_melt[wss_melt$variable %in% c("InverseCVBiomass"), ]
+BiomassTL2_wss <- wss_melt[wss_melt$variable %in% c("BiomassTL2"), ]
+
+png("output/figures/ReportCard/St&RstoPert_wss.png", width=800,height=840, res=72)
+grid.arrange(PlotIndi_with_line_noPanels(MeanLifespan_wss), 
+             PlotIndi_with_line_noPanels(Intrinsicvulnerabilityindex_wss),
+             PlotIndi_with_line_noPanels(InverseCVBiomass_wss),
+             PlotIndi_with_line_noPanels(BiomassTL2_wss), ncol=1)
+dev.off()
+
+
+
+LargeFishIndicator_wss <- wss_melt[wss_melt$variable %in% c("LargeFishIndicator"), ]
+MeanLengthAbundance_wss <- wss_melt[wss_melt$variable %in% c("MeanLengthAbundance"), ]
+MeanTrophicLevel_wss <- wss_melt[wss_melt$variable %in% c("MeanTrophicLevel"), ]
+CommunityCondition_wss <- wss_melt[wss_melt$variable %in% c("CommunityCondition"), ]
+CCMediumBenthivore_wss <- wss_melt[wss_melt$variable %in% c("CCMediumBenthivore"), ]
+CCPiscivore_wss <- wss_melt[wss_melt$variable %in% c("CCPiscivore"), ]
+CCZoopiscivore_wss <- wss_melt[wss_melt$variable %in% c("CCZoopiscivore"), ]
+CCLargeBenthivore_wss <- wss_melt[wss_melt$variable %in% c("CCLargeBenthivore"), ]
+BInvertebrateToDemersal_wss <- wss_melt2[wss_melt2$variable %in% c("BInvertebrateToDemersal"), ]
+BTGZoopiscivore_wss <- wss_melt[wss_melt$variable %in% c("BTGZoopiscivore"), ]
+
+png("output/figures/ReportCard/St&Function_1_wss.png", width=800,height=630, res=72)
+grid.arrange(PlotIndi_with_line_noPanels(LargeFishIndicator_wss), 
+             PlotIndi_with_line_noPanels(MeanLengthAbundance_wss),
+             PlotIndi_with_line_noPanels(MeanTrophicLevel_wss), ncol=1)
+dev.off()
+
+png("output/figures/ReportCard/St&Function_2_wss.png", width=800,height=1060, res=72)
+grid.arrange(PlotIndi_with_line_noPanels(CommunityCondition_wss), 
+             PlotIndi_with_line_noPanels(CCPiscivore_wss),
+             PlotIndi_with_line_noPanels(CCZoopiscivore_wss),
+             PlotIndi_with_line_noPanels(CCMediumBenthivore_wss), 
+             PlotIndi_with_line_noPanels(CCLargeBenthivore_wss), ncol=1)
+dev.off()
+
+png("output/figures/ReportCard/St&Function_3_wss.png", width=800,height=420, res=72)
+grid.arrange(PlotIndi_with_line_noPanels(BInvertebrateToDemersal_wss), 
+             PlotIndi_with_line_noPanels(BTGZoopiscivore_wss))
+dev.off()
+
+
+
+FishingPressure.L_wss <- wss_melt[wss_melt$variable %in% c("FishingPressure.L"), ]
+FPClupeids.L_wss <- wss_melt[wss_melt$variable %in% c("FPClupeids.L"), ]
+FPInvertebrates.L_wss <- wss_melt2[wss_melt2$variable %in% c("FPInvertebrates.L"), ]
+MeanTrophicLevel.L_wss <- wss_melt[wss_melt$variable %in% c("MeanTrophicLevel.L"), ]
+MarineTrophicIndex.L_wss <- wss_melt[wss_melt$variable %in% c("MarineTrophicIndex.L"), ]
+DiversityTargetSpp.L_wss <- wss_melt[wss_melt$variable %in% c("DiversityTargetSpp.L"), ]
+Landings.L_wss <- wss_melt[wss_melt$variable %in% c("Landings.L"), ]
+LSkates.L_wss <- wss_melt[wss_melt$variable %in% c("LSkates.L"), ]
+LFlatfish.L_wss <- wss_melt[wss_melt$variable %in% c("LFlatfish.L"), ]
+LLargePelagic.L_wss <- wss_melt[wss_melt$variable %in% c("LLargePelagic.L"), ]
+
+png("output/figures/ReportCard/FishingPressure_1_wss.png", width=800,height=630, res=72)
+grid.arrange(PlotIndi_with_line_noPanels(FishingPressure.L_wss), 
+             PlotIndi_with_line_noPanels(FPClupeids.L_wss),
+             PlotIndi_with_line_noPanels(FPInvertebrates.L_wss), ncol=1)
+dev.off()
+
+png("output/figures/ReportCard/FishingPressure_2_wss.png", width=800,height=840, res=72)
+grid.arrange(PlotIndi_with_line_noPanels(Landings.L_wss), 
+             PlotIndi_with_line_noPanels(LSkates.L_wss),
+             PlotIndi_with_line_noPanels(LFlatfish.L_wss),
+             PlotIndi_with_line_noPanels(LLargePelagic.L_wss), ncol=1)
+dev.off()
+
+png("output/figures/ReportCard/FishingPressure_3_wss.png", width=800,height=630, res=72)
+grid.arrange(PlotIndi_with_line_noPanels(MeanTrophicLevel.L_wss), 
+             PlotIndi_with_line_noPanels(MarineTrophicIndex.L_wss),
+             PlotIndi_with_line_noPanels(DiversityTargetSpp.L_wss), ncol=1)
+dev.off()
+
+##############################END*************************************************#
+
+
 Biodiv_shelf <- shelf_melt[shelf_melt$variable %in% c("MargalefRichness_s",
                                                 "ShannonDiversity_s"), ]
 
@@ -957,6 +1171,9 @@ Biodiv  <-  list(Biodiv_shelf,Biodiv_ess,Biodiv_wss,Biodiv_nafo4vn,Biodiv_nafo4v
 pdf("output/figures/Biodiversity.pdf", width=10,height=8)
 lapply(Biodiv, PlotIndi_with_line)
 dev.off()
+
+
+
 
 
 StrFc1_shelf <- shelf_melt[shelf_melt$variable %in% c("LargeFishIndicator_s",
@@ -1380,15 +1597,15 @@ lapply(FP, PlotIndi_with_line)
 dev.off()
 
 #######################
-#Plotting indicators that were filtered out
+# -------- Read & Plotting those indicators that were filtered out due to  > 25% NAs -------------------------------
+SS <- read.csv("data/shelfsetq.csv", header=TRUE, na.strings = "NA", sep=",", as.is=T, strip.white=T)
+Shelf_Q <- read.csv("data/esswsssetq.csv", header=TRUE, na.strings = "NA", sep=",", as.is=T, strip.white=T)
 Shelf_Q_without_interpolationORfilters <- stdizeFrame(SS)
+esswss_without_interpolationORfilters <- stdizeFrame(Shelf_Q)
 Shelf_Q_without_interpolationORfilters$BiomassInvertebrates_s
 Shelf_Q_without_interpolationORfilters$BInvertebrateToDemersal_s
-
-esswss_without_interpolationORfilters <- stdizeFrame(Shelf_Q)
 ess_without_interpolationORfilters <- esswss_without_interpolationORfilters[esswss_without_interpolationORfilters$ID %in% c('ESS'), ]
 wss_without_interpolationORfilters <- esswss_without_interpolationORfilters[esswss_without_interpolationORfilters$ID %in% c('WSS'), ]
-
 nafo_without_interpolationORfilters <- stdizeFrame(IndiQ_NAFO)
 nafo4vn_without_interpolationORfilters <- nafo_without_interpolationORfilters[nafo_without_interpolationORfilters$ID %in% c('4VN'), ]
 nafo4vs_without_interpolationORfilters <- nafo_without_interpolationORfilters[nafo_without_interpolationORfilters$ID %in% c('4VS'), ]

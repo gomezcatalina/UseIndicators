@@ -127,6 +127,22 @@ PlotIndi_with_line <- function(x) {
 
 }
 
+PlotIndi_with_line_noPanels <- function(x) {
+  
+  ggplot(x, aes(YEAR, value, colour=variable,
+                group=variable)) +
+    scale_colour_manual(values=cbbPalette) +
+    geom_point(size = 0.5) + geom_line(size=1.3) +
+    #facet_grid(. ~ ID) +
+    theme(text = element_text(size=26)) +
+    theme(axis.title.x=element_blank()) + theme(axis.title.y=element_blank()) +
+    theme(legend.title=element_blank()) +
+    theme(legend.position='bottom') +
+    theme(strip.text.x = element_text(size=13),
+          strip.background = element_rect(fill="white")) 
+}
+
+
                                   # e.g. x = meltCa
 
 PlotIndi_strata <- function(x) {
@@ -182,18 +198,20 @@ PlotDecoupledIndi <- function(x) {
 
 cbbPalette <- c("#3A74BF", "#D41200", "#080100", "#F0E442", "#1f7000", "#00d5b1", 
                 "#CC79A7", "#697172", "#7dfc07", "#f7b927", "#f727ec", "#cfc1ff",
-                "#e04e00", "#4c3002", "#ffffff", "#b2aea7", "#66032c", "#285d66", "#6b1393", "#27e0f7")
+                "#e04e00", "#4c3002", "#b2aea7", "#66032c", "#285d66", "#6b1393", "#27e0f7", "#ffffff")
 
 PlotDecoupledIndi_with_area <- function(x,y) {
 ggplot() + 
   geom_area(data=y, aes(x=YEAR, y=value), color='lightgrey',alpha=0.2) +
   geom_line(data=x, aes(x=YEAR, y=BIOMASS, colour=Species, group=Species), size=1.1) +
+  geom_point(data=x, aes(x=YEAR, y=BIOMASS, colour=Species, group=Species), size=1.5) +  
   scale_colour_manual(values=cbbPalette) +
   facet_grid(. ~ ID) +
   theme(text = element_text(size=26)) +
   theme(axis.title.x=element_blank()) + theme(axis.title.y=element_blank()) +
   theme(legend.title=element_blank()) +
-  theme(legend.position='bottom') +
+  theme(legend.justification = "top") +
+  theme(legend.key.height=unit(1.5,"line")) +
   ggtitle(unique(y$variable))
     
 }
@@ -202,12 +220,14 @@ PlotDecoupledIndi_with_area2 <- function(x,y) {
   ggplot() + 
     geom_area(data=y, aes(x=YEAR, y=Biomass_minusForage), color='lightgrey',alpha=0.2) +
     geom_line(data=x, aes(x=YEAR, y=BIOMASS, colour=Species, group=Species), size=1.1) +
+    geom_point(data=x, aes(x=YEAR, y=BIOMASS, colour=Species, group=Species), size=1.5) + 
     scale_colour_manual(values=cbbPalette) +
     facet_grid(. ~ ID) +
     theme(text = element_text(size=26)) +
     theme(axis.title.x=element_blank()) + theme(axis.title.y=element_blank()) +
     theme(legend.title=element_blank()) +
-    theme(legend.position='bottom') +
+    theme(legend.justification = "top") +
+    theme(legend.key.height=unit(1.5,"line")) +
     ggtitle("Biomass_minusForage")
   
 }
